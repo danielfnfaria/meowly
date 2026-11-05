@@ -1,0 +1,54 @@
+{{- $ctx := dict "root" $ "component" "controller" }}
+{{- $b := .Values.controller }}
+# One replica and no Service: the controller does not serve HTTP (kopf watches the API server).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "purr.componentName" $ctx }}
+  labels:
+    {{- include "purr.componentLabels" $ctx | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "purr.selectorLabels" $ctx | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "purr.componentLabels" $ctx | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "purr.componentName" $ctx }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: controller
+          image: {{ include "purr.image" (dict "root" $ "image" $b.image) | quote }}
+          imagePullPolicy: {{ $b.image.pullPolicy }}
+          env:
+            - name: PURR_LOG_LEVEL
+              value: {{ $b.logLevel | quote }}
+            - name: PURR_EXECUTION_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: PURR_WORKER_IMAGE
+              value: {{ include "purr.image" (dict "root" $ "image" .Values.worker.image) | quote }}
+            - name: PURR_WORKER_SERVICE_ACCOUNT
+              value: {{ include "purr.workerServiceAccountName" . | quote }}
+            - name: PURR_TASK_TTL_SECONDS
+              value: {{ $b.taskTtlSeconds | quote }}
+            - name: PURR_JOB_ACTIVE_DEADLINE_SECONDS
+              value: {{ $b.job.activeDeadlineSeconds | quote }}
+            - name: PURR_JOB_BACKOFF_LIMIT
+              value: {{ $b.job.backoffLimit | quote }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            {{- toYaml $b.resources | nindent 12 }}

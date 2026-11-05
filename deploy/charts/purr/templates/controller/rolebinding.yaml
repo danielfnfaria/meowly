@@ -1,0 +1,15 @@
+{{- $ctx := dict "root" $ "component" "controller" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "purr.componentName" $ctx }}
+  labels:
+    {{- include "purr.componentLabels" $ctx | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "purr.componentName" $ctx }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "purr.componentName" $ctx }}
+    namespace: {{ .Release.Namespace }}

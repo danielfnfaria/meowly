@@ -1,0 +1,15 @@
+{{- $ctx := dict "root" $ "component" "api" }}
+# Namespaced: the API creates and reads PlatformTasks and reads pods/logs of the executions.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "purr.componentName" $ctx }}
+  labels:
+    {{- include "purr.componentLabels" $ctx | nindent 4 }}
+rules:
+  - apiGroups: ["purr.sh"]
+    resources: ["platformtasks"]
+    verbs: ["create", "get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]

@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.import_linter_cache/
+.coverage
+htmlcov/
+coverage.xml
+dist/
+*.egg-info/
+.env
+.env.*
+!.env.example
+openapi.json
+
+# Subcharts fetched by `helm dependency build` (Chart.lock pins them).
+deploy/charts/purr/charts/*.tgz
+
+# Claude Code: local worktrees of sub-agents and per-user settings.
+.claude/worktrees/
+.claude/settings.local.json

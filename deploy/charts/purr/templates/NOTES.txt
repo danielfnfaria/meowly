@@ -1,0 +1,26 @@
+purr {{ .Chart.AppVersion }} installed in namespace {{ .Release.Namespace }} as "{{ .Release.Name }}".
+
+UI and API (same Service, the API serves the built UI):
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "purr.componentName" (dict "root" . "component" "api") }} {{ .Values.api.service.port }}:{{ .Values.api.service.port }}
+  open http://localhost:{{ .Values.api.service.port }}
+
+Self-service requests (one PlatformTask per request):
+
+  kubectl -n {{ .Release.Namespace }} get platformtasks
+  kubectl -n {{ .Release.Namespace }} describe platformtask <name>
+  kubectl -n {{ .Release.Namespace }} get jobs,pods
+
+Controller logs:
+
+  kubectl -n {{ .Release.Namespace }} logs deploy/{{ include "purr.componentName" (dict "root" . "component" "controller") }} -f
+{{- if .Values.postgresql.enabled }}
+
+Development Postgres is enabled (do not use in production). Password:
+
+  kubectl -n {{ .Release.Namespace }} get secret {{ include "purr.componentName" (dict "root" . "component" "postgresql") }} -o jsonpath='{.data.password}' | base64 -d
+{{- end }}
+{{- if not .Values.crds.install }}
+
+crds.install=false: the PlatformTask CRD was NOT installed by this release; make sure it exists.
+{{- end }}

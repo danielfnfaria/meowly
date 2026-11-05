@@ -1,0 +1,68 @@
+# Local cluster: the whole platform in the `purr` namespace of minikube.
+#
+#   make minikube-start && make minikube-dev
+#
+# The three images are built straight into minikube's Docker (no registry, no push) with a
+# content tag, so the chart's `IfNotPresent` always runs what was just built. No ingress and
+# no cert-manager: skaffold port-forwards the API (and Postgres, to look at the catalog).
+#
+# `kubeContext: minikube` is pinned on purpose: the current context may be a real cluster.
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: purr
+
+build:
+  tagPolicy:
+    inputDigest: {}
+  local:
+    push: false
+    useBuildkit: true
+  artifacts:
+    - image: purr-api
+      context: .
+      docker:
+        dockerfile: apps/api/Dockerfile
+    - image: purr-controller
+      context: .
+      docker:
+        dockerfile: apps/controller/Dockerfile
+    - image: purr-worker
+      context: .
+      docker:
+        dockerfile: apps/worker/Dockerfile
+
+manifests:
+  helm:
+    releases:
+      - name: purr
+        chartPath: deploy/charts/purr
+        valuesFiles:
+          - deploy/values/minikube.yaml
+        namespace: purr
+        createNamespace: true
+        setValueTemplates:
+          api.image.repository: "{{.IMAGE_REPO_purr_api}}"
+          api.image.tag: "{{.IMAGE_TAG_purr_api}}"
+          controller.image.repository: "{{.IMAGE_REPO_purr_controller}}"
+          controller.image.tag: "{{.IMAGE_TAG_purr_controller}}"
+          worker.image.repository: "{{.IMAGE_REPO_purr_worker}}"
+          worker.image.tag: "{{.IMAGE_TAG_purr_worker}}"
+        version: 0.1.0
+
+deploy:
+  kubeContext: minikube
+  helm: {}
+  statusCheckDeadlineSeconds: 300
+
+portForward:
+  - resourceType: service
+    resourceName: purr-api
+    namespace: purr
+    port: 8000
+    localPort: 8000
+  - resourceType: service
+    resourceName: purr-postgresql
+    namespace: purr
+    port: 5432
+    localPort: 5432

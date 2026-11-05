@@ -1,0 +1,141 @@
+# Default values of the purr chart. Every value says what it is and what changing it does.
+
+# -- Overrides the chart name used in labels and resource names.
+nameOverride: ""
+# -- Overrides the full release-scoped base name (resources become <fullnameOverride>-api...). The skaffold port-forwards expect "purr-api" and "purr-postgresql".
+fullnameOverride: ""
+
+crds:
+  # -- Renders the PlatformTask CRD with the release. false = the CRD must already exist; with true, uninstalling the release deletes the CRD and every PlatformTask.
+  install: true
+
+api:
+  image:
+    # -- Image of the API (also runs the alembic migration initContainer and serves the built UI).
+    repository: purr-api
+    # -- Image tag; empty = the chart's appVersion.
+    tag: ""
+    # -- Pull policy; IfNotPresent keeps locally built images (minikube) from being re-pulled.
+    pullPolicy: IfNotPresent
+  # -- Number of API replicas; the API is stateless, more replicas = more availability (migrations run on every pod start and are idempotent).
+  replicaCount: 1
+  # -- Container port, also PURR_PORT; the Service targets it.
+  port: 8000
+  # -- PURR_LOG_LEVEL: verbosity of the API logs (DEBUG, INFO, WARNING, ERROR).
+  logLevel: INFO
+  # -- PURR_PUBLIC_URL: external URL users reach purr at; used to build links and CORS/redirects. Empty = unset.
+  publicUrl: ""
+  # -- PURR_MAX_BODY_BYTES: largest request body accepted; bigger requests are rejected with 413.
+  maxBodyBytes: 1048576
+  # -- Resources of the api container and of the migrate initContainer; too low = OOMKilled/throttled.
+  resources:
+    requests:
+      cpu: 100m
+      memory: 192Mi
+    limits:
+      memory: 512Mi
+  # -- Probes (fields beyond the HTTP path). startup guards slow boots/migrations; the others only start once it passes.
+  probes:
+    startup:
+      periodSeconds: 3
+      failureThreshold: 40
+    readiness:
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 3
+    liveness:
+      periodSeconds: 20
+      timeoutSeconds: 3
+      failureThreshold: 3
+  shutdown:
+    # -- PURR_SHUTDOWN_TIMEOUT_SECONDS: how long the API drains in-flight requests on SIGTERM; terminationGracePeriodSeconds = this + preStop.sleepSeconds + 5.
+    timeoutSeconds: 25
+  preStop:
+    # -- Native preStop sleep (k8s >= 1.30) so endpoints are removed before SIGTERM; 0 disables the wait.
+    sleepSeconds: 5
+  service:
+    # -- Service type; ClusterIP = reach it by port-forward or an Ingress you manage.
+    type: ClusterIP
+    # -- Service port.
+    port: 8000
+  database:
+    # -- PURR_DATABASE_URL (SQLAlchemy asyncpg URL), stored in a chart-managed Secret. Ignored when existingSecret is set; empty = URL of the chart's dev Postgres Service, and with postgresql.enabled=false the install fails instead of pointing at a Service that does not exist.
+    url: ""
+    # -- Name of a Secret that already holds the URL (production: managed database). Chart does not create the api Secret then.
+    existingSecret: ""
+    # -- Key inside existingSecret that holds the URL.
+    existingSecretKey: database-url
+    pool:
+      # -- PURR_DB_POOL_SIZE: persistent connections per pod; replicas x (size + maxOverflow) must stay under the database max_connections.
+      size: 5
+      # -- PURR_DB_MAX_OVERFLOW: extra connections allowed on bursts, closed afterwards.
+      maxOverflow: 5
+  podDisruptionBudget:
+    # -- Creates a PodDisruptionBudget for the API; only useful with replicaCount > 1 (otherwise it blocks node drains).
+    enabled: false
+    # -- Pods that must stay up during voluntary disruptions.
+    minAvailable: 1
+
+controller:
+  image:
+    # -- Image of the kopf controller that reconciles PlatformTask into Job.
+    repository: purr-controller
+    # -- Image tag; empty = the chart's appVersion.
+    tag: ""
+    # -- Pull policy.
+    pullPolicy: IfNotPresent
+  # -- PURR_LOG_LEVEL of the controller.
+  logLevel: INFO
+  # -- Resources of the controller container; it is a single replica, so it is not scaled out.
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+  # -- PURR_TASK_TTL_SECONDS: how long a finished PlatformTask (and its Job) is kept before cleanup; lower = fewer objects, less history in the cluster.
+  taskTtlSeconds: 86400
+  job:
+    # -- PURR_JOB_ACTIVE_DEADLINE_SECONDS: hard time limit of a worker Job; exceeded = Job killed and the task fails.
+    activeDeadlineSeconds: 900
+    # -- PURR_JOB_BACKOFF_LIMIT: retries of a failed worker pod before the Job fails; 0 = never retry (tasks may not be idempotent).
+    backoffLimit: 0
+
+worker:
+  image:
+    # -- Image of the worker run by each Job (executes the task, prints JSONL events on stdout). Not deployed by the chart; passed to API/controller as PURR_WORKER_IMAGE.
+    repository: purr-worker
+    # -- Image tag; empty = the chart's appVersion.
+    tag: ""
+    # -- Pull policy (set on the Job by the controller via the image reference; kept here for overlays).
+    pullPolicy: IfNotPresent
+  serviceAccount:
+    # -- ServiceAccount of the worker Jobs (PURR_WORKER_SERVICE_ACCOUNT); created with NO permissions. Empty = <fullname>-worker.
+    name: ""
+
+postgresql:
+  # -- DEVELOPMENT ONLY: deploys a single Postgres StatefulSet, so that a plain `helm install` of this chart comes up working. Production sets this to false and points api.database.existingSecret at a managed database; with it false and no api.database.url/existingSecret the render fails on purpose.
+  enabled: true
+  image:
+    # -- Postgres image repository.
+    repository: postgres
+    # -- Postgres image tag.
+    tag: 16-alpine
+    # -- Pull policy.
+    pullPolicy: IfNotPresent
+  auth:
+    # -- Database user.
+    username: purr
+    # -- Database name.
+    database: purr
+    # -- Password of the dev database (kept in a Secret; the default is NOT safe for anything shared).
+    password: purr
+  persistence:
+    # -- Keeps data in a PVC; false = emptyDir, data is lost when the pod restarts.
+    enabled: true
+    # -- PVC size.
+    size: 2Gi
+    # -- StorageClass; empty = cluster default.
+    storageClass: ""
+  # -- Resources of the dev Postgres.
+  resources: {}

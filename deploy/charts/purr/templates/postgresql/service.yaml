@@ -1,0 +1,17 @@
+{{- if .Values.postgresql.enabled }}
+{{- $ctx := dict "root" $ "component" "postgresql" }}
+# DEVELOPMENT ONLY (see secret.yaml).
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "purr.componentName" $ctx }}
+  labels:
+    {{- include "purr.componentLabels" $ctx | nindent 4 }}
+spec:
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+  selector:
+    {{- include "purr.selectorLabels" $ctx | nindent 4 }}
+{{- end }}

@@ -1,0 +1,25 @@
+[project]
+name = "purr-http"
+version = "0.1.0"
+description = "The HTTP plumbing common to every purr process that serves HTTP: app factory, hardening, error table, health routes, bearer extraction"
+requires-python = ">=3.13"
+dependencies = [
+    "purr-contracts",
+    "purr-runtime",
+    "fastapi>=0.116",
+    "starlette",
+    "uvicorn[standard]>=0.34",
+    "structlog>=25",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/purr_http"]

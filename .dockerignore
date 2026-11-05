@@ -1,0 +1,23 @@
+# Build context of every image is the repo root (the API image also builds the UI):
+# keep VCS data, dependencies, build output, caches and local secrets out.
+.git
+.github
+.claude
+.vscode
+.venv
+.env
+.env.*
+!.env.example
+**/node_modules
+**/dist
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.ruff_cache
+**/.import_linter_cache
+.import_linter_cache
+**/.coverage
+**/coverage.xml
+**/*.tsbuildinfo
+**/.DS_Store
+docs

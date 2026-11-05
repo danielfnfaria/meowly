@@ -1,0 +1,157 @@
+[project]
+name = "purr-workspace"
+version = "0.0.0"
+description = "purr - internal developer platform, Python monorepo (api, controller, worker; contracts, core, http, engine, runtime)"
+requires-python = ">=3.13"
+
+[tool.uv.workspace]
+members = ["apps/*", "packages/*"]
+exclude = ["apps/ui"]
+
+[tool.uv.sources]
+purr-contracts = { workspace = true }
+purr-core = { workspace = true }
+purr-engine = { workspace = true }
+purr-http = { workspace = true }
+purr-runtime = { workspace = true }
+purr-api = { workspace = true }
+purr-controller = { workspace = true }
+purr-worker = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "ruff>=0.13",
+    "pyright>=1.1.405",
+    "pytest>=8.4",
+    "pytest-asyncio>=1.1",
+    "pytest-cov>=6",
+    "pytest-xdist>=3.8",
+    "import-linter>=2.1",
+    # Reading the chart's CRD in a test (packages/contracts/tests/test_crd_parity.py).
+    "pyyaml>=6",
+    "types-pyyaml>=6",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["apps/*/src", "packages/*/src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "ASYNC", "S", "C4", "SIM", "RUF", "PTH", "T20"]
+ignore = ["S101"]  # assert is fine in tests
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S", "T20"]
+"**/alembic/**" = ["INP001"]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "purr_contracts",
+    "purr_core",
+    "purr_engine",
+    "purr_http",
+    "purr_runtime",
+    "purr_api",
+    "purr_controller",
+    "purr_worker",
+]
+
+[tool.pyright]
+pythonVersion = "3.13"
+typeCheckingMode = "strict"
+include = ["apps", "packages"]
+exclude = ["**/alembic/versions", "**/.venv", "apps/ui"]
+venvPath = "."
+venv = ".venv"
+# A suppression that no longer suppresses anything is an error: they do not pile up.
+reportUnnecessaryTypeIgnoreComment = "error"
+
+[tool.pytest.ini_options]
+testpaths = ["apps", "packages"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-ra --strict-markers --import-mode=importlib"
+markers = ["integration: needs external services (postgres, kubernetes)"]
+
+[tool.coverage.run]
+source = [
+    "apps/api/src",
+    "apps/controller/src",
+    "apps/worker/src",
+    "packages/contracts/src",
+    "packages/core/src",
+    "packages/engine/src",
+    "packages/http/src",
+    "packages/runtime/src",
+]
+omit = ["**/alembic/versions/*"]
+# SQLAlchemy's async engine resumes code in greenlets: without this, every line after an
+# awaited query is reported as not covered.
+concurrency = ["greenlet", "thread"]
+relative_files = true
+
+# ---- Import boundaries (import-linter: `uv run lint-imports`, part of `make check`) ----
+# An app is one process/image and never imports another app; shared code lives in packages/,
+# and packages never import apps (docs/adr/0003-apps-and-packages.md). Layers:
+# contracts <- core <- http (the API), contracts <- engine (the worker).
+# The controller and the worker hold no catalog and serve no HTTP: contracts + runtime only
+# (plus the engine, in the worker). `runtime` is a leaf every process uses.
+
+[tool.importlinter]
+root_packages = [
+    "purr_api",
+    "purr_controller",
+    "purr_worker",
+    "purr_contracts",
+    "purr_core",
+    "purr_engine",
+    "purr_http",
+    "purr_runtime",
+]
+include_external_packages = false
+
+[[tool.importlinter.contracts]]
+name = "Apps never import other apps"
+type = "independence"
+modules = ["purr_api", "purr_controller", "purr_worker"]
+
+[[tool.importlinter.contracts]]
+name = "Packages never import apps"
+type = "forbidden"
+source_modules = ["purr_contracts", "purr_core", "purr_engine", "purr_http", "purr_runtime"]
+forbidden_modules = ["purr_api", "purr_controller", "purr_worker"]
+
+[[tool.importlinter.contracts]]
+name = "Contracts import no other workspace package"
+type = "forbidden"
+source_modules = ["purr_contracts"]
+forbidden_modules = ["purr_core", "purr_engine", "purr_http", "purr_runtime"]
+
+# Process plumbing (JSON logging, server bind settings): structlog + pydantic-settings only.
+[[tool.importlinter.contracts]]
+name = "The runtime imports no workspace package"
+type = "forbidden"
+source_modules = ["purr_runtime"]
+forbidden_modules = ["purr_contracts", "purr_core", "purr_engine", "purr_http"]
+
+# The engine runs inside a worker pod: no database, no HTTP server.
+[[tool.importlinter.contracts]]
+name = "The engine imports neither the core nor the HTTP package"
+type = "forbidden"
+source_modules = ["purr_engine"]
+forbidden_modules = ["purr_core", "purr_http"]
+
+[[tool.importlinter.contracts]]
+name = "The core imports neither the engine nor the HTTP package"
+type = "forbidden"
+source_modules = ["purr_core"]
+forbidden_modules = ["purr_engine", "purr_http"]
+
+# The controller only reconciles PlatformTask -> Job: it reads no catalog and serves no HTTP.
+# The worker pod has no database credentials either (ADR 0002).
+[[tool.importlinter.contracts]]
+name = "The controller and the worker touch neither the catalog nor the HTTP package"
+type = "forbidden"
+source_modules = ["purr_controller", "purr_worker"]
+forbidden_modules = ["purr_core", "purr_http"]

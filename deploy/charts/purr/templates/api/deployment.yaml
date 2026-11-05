@@ -1,0 +1,113 @@
+{{- $ctx := dict "root" $ "component" "api" }}
+{{- $b := .Values.api }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "purr.componentName" $ctx }}
+  labels:
+    {{- include "purr.componentLabels" $ctx | nindent 4 }}
+spec:
+  replicas: {{ $b.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "purr.selectorLabels" $ctx | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "purr.componentLabels" $ctx | nindent 8 }}
+      {{- if not $b.database.existingSecret }}
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/api/secret.yaml") . | sha256sum }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "purr.componentName" $ctx }}
+      terminationGracePeriodSeconds: {{ include "purr.terminationGracePeriodSeconds" . }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: migrate
+          image: {{ include "purr.image" (dict "root" $ "image" $b.image) | quote }}
+          imagePullPolicy: {{ $b.image.pullPolicy }}
+          command: ["alembic", "upgrade", "head"]
+          env:
+            - name: PURR_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "purr.databaseSecretName" . }}
+                  key: {{ include "purr.databaseSecretKey" . }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            {{- toYaml $b.resources | nindent 12 }}
+      containers:
+        - name: api
+          image: {{ include "purr.image" (dict "root" $ "image" $b.image) | quote }}
+          imagePullPolicy: {{ $b.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $b.port }}
+              protocol: TCP
+          env:
+            - name: PURR_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "purr.databaseSecretName" . }}
+                  key: {{ include "purr.databaseSecretKey" . }}
+            - name: PURR_LOG_LEVEL
+              value: {{ $b.logLevel | quote }}
+            - name: PURR_LAUNCHER
+              value: "kubernetes"
+            - name: PURR_EXECUTION_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: PURR_WORKER_IMAGE
+              value: {{ include "purr.image" (dict "root" $ "image" .Values.worker.image) | quote }}
+            - name: PURR_HOST
+              value: "0.0.0.0"
+            - name: PURR_PORT
+              value: {{ $b.port | quote }}
+            - name: PURR_SHUTDOWN_TIMEOUT_SECONDS
+              value: {{ $b.shutdown.timeoutSeconds | quote }}
+            - name: PURR_UI_DIR
+              value: "/app/ui"
+            - name: PURR_PUBLIC_URL
+              value: {{ $b.publicUrl | quote }}
+            - name: PURR_MAX_BODY_BYTES
+              value: {{ $b.maxBodyBytes | quote }}
+            - name: PURR_DB_POOL_SIZE
+              value: {{ $b.database.pool.size | quote }}
+            - name: PURR_DB_MAX_OVERFLOW
+              value: {{ $b.database.pool.maxOverflow | quote }}
+          startupProbe:
+            httpGet:
+              path: /healthz/ready
+              port: http
+            {{- toYaml $b.probes.startup | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /healthz/ready
+              port: http
+            {{- toYaml $b.probes.readiness | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz/live
+              port: http
+            {{- toYaml $b.probes.liveness | nindent 12 }}
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: {{ $b.preStop.sleepSeconds }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            {{- toYaml $b.resources | nindent 12 }}

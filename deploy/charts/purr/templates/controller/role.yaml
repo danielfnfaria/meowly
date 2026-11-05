@@ -1,0 +1,24 @@
+{{- $ctx := dict "root" $ "component" "controller" }}
+# Namespaced on purpose (no ClusterRole): the controller only watches the release namespace.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "purr.componentName" $ctx }}
+  labels:
+    {{- include "purr.componentLabels" $ctx | nindent 4 }}
+rules:
+  - apiGroups: ["purr.sh"]
+    resources: ["platformtasks"]
+    verbs: ["get", "list", "watch", "create", "patch", "delete"]
+  - apiGroups: ["purr.sh"]
+    resources: ["platformtasks/status"]
+    verbs: ["get", "patch", "update"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["create", "get", "list", "watch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]

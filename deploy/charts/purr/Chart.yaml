@@ -1,0 +1,15 @@
+apiVersion: v2
+name: purr
+description: purr, an Internal Developer Platform - catalog API and UI, PlatformTask controller and worker Jobs in a single chart.
+type: application
+keywords:
+  - idp
+  - internal-developer-platform
+  - platform-engineering
+  - self-service
+# `version` is the chart version: bump it on every change to a template or to values.yaml.
+version: 0.1.0
+# `appVersion` is the default tag of the three images (api, controller, worker) when
+# `<component>.image.tag` is empty.
+appVersion: "v0.1.0"
+kubeVersion: ">=1.30.0-0"
