@@ -35,3 +35,6 @@ class InMemoryTaskStore:
             return self._tasks[name]
         except KeyError:
             raise NotFoundError(f"task {name!r} not found", code="task_not_found") from None
+
+    async def close(self) -> None:
+        """Nothing is held outside the process."""

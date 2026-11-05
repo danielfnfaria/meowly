@@ -27,7 +27,7 @@ dev = [
     "pytest-cov>=6",
     "pytest-xdist>=3.8",
     "import-linter>=2.1",
-    # Reading the chart's CRD in a test (packages/contracts/tests/test_crd_parity.py).
+    # Reading the chart's CRD in a test (tests/test_crd_parity.py).
     "pyyaml>=6",
     "types-pyyaml>=6",
 ]
@@ -68,7 +68,7 @@ venv = ".venv"
 reportUnnecessaryTypeIgnoreComment = "error"
 
 [tool.pytest.ini_options]
-testpaths = ["apps", "packages"]
+testpaths = ["apps", "packages", "tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 addopts = "-ra --strict-markers --import-mode=importlib"

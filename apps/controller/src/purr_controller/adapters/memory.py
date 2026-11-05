@@ -9,7 +9,6 @@ class MemoryKube:
         self.logs: dict[str, str] = {}
         self.tasks: dict[str, PlatformTask] = {}
         self.status_patches: list[tuple[str, TaskStatus]] = []
-        self.deleted_jobs: list[str] = []
         self.deleted_tasks: list[str] = []
 
     async def create_job(self, manifest: JsonDict) -> None:
@@ -17,10 +16,6 @@ class MemoryKube:
 
     async def get_job(self, name: str) -> JsonDict | None:
         return self.jobs.get(name)
-
-    async def delete_job(self, name: str) -> None:
-        self.deleted_jobs.append(name)
-        self.jobs.pop(name, None)
 
     async def pod_log(self, job_name: str) -> str:
         return self.logs.get(job_name, "")

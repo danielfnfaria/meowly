@@ -67,8 +67,6 @@ spec:
               value: "kubernetes"
             - name: PURR_EXECUTION_NAMESPACE
               value: {{ .Release.Namespace | quote }}
-            - name: PURR_WORKER_IMAGE
-              value: {{ include "purr.image" (dict "root" $ "image" .Values.worker.image) | quote }}
             - name: PURR_HOST
               value: "0.0.0.0"
             - name: PURR_PORT
@@ -77,8 +75,6 @@ spec:
               value: {{ $b.shutdown.timeoutSeconds | quote }}
             - name: PURR_UI_DIR
               value: "/app/ui"
-            - name: PURR_PUBLIC_URL
-              value: {{ $b.publicUrl | quote }}
             - name: PURR_MAX_BODY_BYTES
               value: {{ $b.maxBodyBytes | quote }}
             - name: PURR_DB_POOL_SIZE

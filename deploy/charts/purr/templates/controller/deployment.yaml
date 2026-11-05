@@ -37,6 +37,10 @@ spec:
               value: {{ .Release.Namespace | quote }}
             - name: PURR_WORKER_IMAGE
               value: {{ include "purr.image" (dict "root" $ "image" .Values.worker.image) | quote }}
+            - name: PURR_WORKER_IMAGE_PULL_POLICY
+              value: {{ .Values.worker.image.pullPolicy | quote }}
+            - name: PURR_WORKER_RESOURCES
+              value: {{ .Values.worker.resources | toJson | quote }}
             - name: PURR_WORKER_SERVICE_ACCOUNT
               value: {{ include "purr.workerServiceAccountName" . | quote }}
             - name: PURR_TASK_TTL_SECONDS

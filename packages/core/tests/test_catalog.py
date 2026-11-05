@@ -79,3 +79,13 @@ async def test_session_commits_and_rolls_back(database: Database) -> None:
         repo = OwnerRepository(s)
         assert await repo.get_by_slug("kept") is not None
         assert await repo.get_by_slug("lost") is None
+
+
+async def test_deleting_an_owner_with_components_is_a_conflict(
+    core: Core, session: AsyncSession
+) -> None:
+    owner = await core.owners.create("platform", "Platform")
+    await core.components.create("svc", "Svc", owner.id)
+    with pytest.raises(ConflictError, match="'platform' is still referenced"):
+        await core.owners.delete("platform")
+    await session.rollback()  # a failed flush poisons the session; the request scope does this

@@ -1,9 +1,11 @@
 from collections.abc import AsyncGenerator
 from pathlib import Path
+from typing import Any
 
 import httpx
 import pytest
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy import event
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.pool import StaticPool
 
 from purr_api.api.deps import AppState
@@ -20,11 +22,23 @@ def make_settings(ui_dir: Path | None = None) -> Settings:
     )
 
 
+def enable_sqlite_foreign_keys(engine: AsyncEngine) -> None:
+    """SQLite ignores foreign keys unless asked per connection; Postgres never does. Without
+    this no test can see a constraint fire, which is how a 500 on delete went unnoticed."""
+
+    @event.listens_for(engine.sync_engine, "connect")
+    def _on_connect(dbapi_connection: Any, _: object) -> None:
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
+
 @pytest.fixture
 async def state() -> AsyncGenerator[AppState]:
     # StaticPool: every session shares the one in-memory connection, so the schema created
     # here is the one the requests see.
     engine = create_async_engine("sqlite+aiosqlite://", poolclass=StaticPool)
+    enable_sqlite_foreign_keys(engine)
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all)
     db = Database(engine)

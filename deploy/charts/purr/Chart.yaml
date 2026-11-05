@@ -8,7 +8,7 @@ keywords:
   - platform-engineering
   - self-service
 # `version` is the chart version: bump it on every change to a template or to values.yaml.
-version: 0.1.0
+version: 0.1.1
 # `appVersion` is the default tag of the three images (api, controller, worker) when
 # `<component>.image.tag` is empty.
 appVersion: "v0.1.0"

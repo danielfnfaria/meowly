@@ -1,6 +1,7 @@
 """PlatformTask create/resume: turn the CR into a Job and mark it running."""
 
 from collections.abc import Mapping
+from datetime import UTC, datetime
 from typing import Any
 
 import kopf
@@ -13,9 +14,9 @@ from purr_contracts import (
     task_from_body,
 )
 from purr_contracts import ValidationError as InvalidTask
+from purr_controller.handlers.job import reconcile_from_job
 from purr_controller.handlers.runtime import runtime_of
 from purr_controller.services.job import job_manifest
-from purr_controller.services.reconcile import JobOutcome, JobState, next_status
 
 log = structlog.get_logger(__name__)
 
@@ -28,6 +29,7 @@ async def task_created(body: Mapping[str, Any], name: str, memo: kopf.Memo, **_:
         task = task_from_body(body)
     except ParseError as exc:
         # Retrying cannot fix a spec this version does not understand: fail the task.
+        now = datetime.now(UTC)
         log.warning("task.invalid", task=name, errors=exc.error_count())
         await rt.kube.patch_task_status(
             name,
@@ -35,6 +37,10 @@ async def task_created(body: Mapping[str, Any], name: str, memo: kopf.Memo, **_:
                 phase=TaskPhase.FAILED,
                 error=InvalidTask.code,
                 message="the PlatformTask spec is not valid for this version of purr",
+                # The task never ran, so both are the same instant. Without finished_at the
+                # TTL prune never expires a terminal task.
+                started_at=now,
+                finished_at=now,
             ),
         )
         return
@@ -46,7 +52,9 @@ async def task_created(body: Mapping[str, Any], name: str, memo: kopf.Memo, **_:
         return
 
     await rt.kube.create_job(job_manifest(task, rt.settings))
-    running = next_status(current, JobState(JobOutcome.ACTIVE), "")
-    if running is not None:
-        await rt.kube.patch_task_status(name, running)
+    # Not a blind `running`: on a resume the Job may have ended already (the controller died
+    # between creating it and writing the status) and no further Job event will come. A new
+    # Job reads as active, which is `running`.
+    job = await rt.kube.get_job(name)
+    await reconcile_from_job(rt, name, job or {})
     log.info("task.job_created", task=name, kind=task.spec.kind)

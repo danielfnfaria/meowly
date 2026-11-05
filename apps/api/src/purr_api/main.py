@@ -52,6 +52,7 @@ def create_app(settings: Settings | None = None, *, state: AppState | None = Non
         try:
             yield
         finally:
+            await container.tasks.close()
             await container.db.dispose()
 
     app = build_app(

@@ -23,8 +23,6 @@ api:
   port: 8000
   # -- PURR_LOG_LEVEL: verbosity of the API logs (DEBUG, INFO, WARNING, ERROR).
   logLevel: INFO
-  # -- PURR_PUBLIC_URL: external URL users reach purr at; used to build links and CORS/redirects. Empty = unset.
-  publicUrl: ""
   # -- PURR_MAX_BODY_BYTES: largest request body accepted; bigger requests are rejected with 413.
   maxBodyBytes: 1048576
   # -- Resources of the api container and of the migrate initContainer; too low = OOMKilled/throttled.
@@ -103,12 +101,22 @@ controller:
 
 worker:
   image:
-    # -- Image of the worker run by each Job (executes the task, prints JSONL events on stdout). Not deployed by the chart; passed to API/controller as PURR_WORKER_IMAGE.
+    # -- Image of the worker run by each Job (executes the task, prints JSONL events on stdout). Not deployed by the chart; passed to the controller as PURR_WORKER_IMAGE (it builds the Jobs).
     repository: purr-worker
     # -- Image tag; empty = the chart's appVersion.
     tag: ""
-    # -- Pull policy (set on the Job by the controller via the image reference; kept here for overlays).
+    # -- PURR_WORKER_IMAGE_PULL_POLICY: imagePullPolicy of the worker container in each Job; IfNotPresent keeps locally built images (minikube), Always re-pulls a mutable tag on every task.
     pullPolicy: IfNotPresent
+  # -- PURR_WORKER_RESOURCES (as JSON): resources of the worker container in each Job. Without them a worker pod is BestEffort: first to be evicted and free to starve the node.
+  resources:
+    requests:
+      # -- Scheduling reservation; too low = the node is overcommitted when many tasks run at once.
+      cpu: 50m
+      # -- Scheduling reservation; too low = same as cpu, and memory pressure evicts it early.
+      memory: 64Mi
+    limits:
+      # -- Hard cap; exceeded = the worker is OOMKilled and the task fails with no_result. No cpu limit on purpose: throttling only slows a task down.
+      memory: 256Mi
   serviceAccount:
     # -- ServiceAccount of the worker Jobs (PURR_WORKER_SERVICE_ACCOUNT); created with NO permissions. Empty = <fullname>-worker.
     name: ""

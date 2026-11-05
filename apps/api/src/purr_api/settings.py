@@ -9,7 +9,6 @@ class Settings(CoreSettings):
     # Directory with the built UI (`index.html` + assets). Unset or without an index.html, the
     # API serves only itself: that is the state before the UI exists, and in most tests.
     ui_dir: str | None = None
-    public_url: str | None = None
     max_body_bytes: int = 1_048_576
 
 

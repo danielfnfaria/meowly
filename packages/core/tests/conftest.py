@@ -1,10 +1,23 @@
 from collections.abc import AsyncIterator
+from typing import Any
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy import event
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.pool import StaticPool
 
 from purr_core import Base, Core, Database, InMemoryTaskStore, build_core
+
+
+def enable_sqlite_foreign_keys(engine: AsyncEngine) -> None:
+    """SQLite ignores foreign keys unless asked per connection; Postgres never does. Without
+    this no test can see a constraint fire, which is how a 500 on delete went unnoticed."""
+
+    @event.listens_for(engine.sync_engine, "connect")
+    def _on_connect(dbapi_connection: Any, _: object) -> None:
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
 
 
 @pytest.fixture
@@ -15,6 +28,7 @@ async def database() -> AsyncIterator[Database]:
         poolclass=StaticPool,
         connect_args={"check_same_thread": False},
     )
+    enable_sqlite_foreign_keys(engine)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     db = Database(engine)

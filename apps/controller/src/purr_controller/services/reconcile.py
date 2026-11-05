@@ -92,6 +92,19 @@ def next_status(
     )
 
 
+def lost_job_status(current: TaskStatus | None, *, now: datetime | None = None) -> TaskStatus:
+    """The terminal status of a running task whose Job no longer exists: nothing will ever
+    report on it, so it fails instead of staying `running` forever."""
+    now = now or datetime.now(UTC)
+    return TaskStatus(
+        phase=TaskPhase.FAILED,
+        error="job_missing",
+        message="the Job of this task disappeared before it reported a result",
+        started_at=current.started_at if current and current.started_at else now,
+        finished_at=now,
+    )
+
+
 def expired(status: TaskStatus | None, ttl_seconds: int, *, now: datetime) -> bool:
     """Whether a task finished more than `ttl_seconds` ago. A task that is not terminal, or
     has no finish time, is never expired."""

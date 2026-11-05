@@ -32,6 +32,22 @@ def job_manifest(task: PlatformTask, cfg: Settings) -> JsonDict:
     labels = {TASK_LABEL: task.name, MANAGED_BY_LABEL: MANAGED_BY}
     if task.spec.component:
         labels[COMPONENT_LABEL] = task.spec.component
+    container: JsonDict = {
+        "name": WORKER_CONTAINER,
+        "image": cfg.worker_image,
+        "imagePullPolicy": cfg.worker_image_pull_policy,
+        "env": [
+            {"name": "PURR_TASK_NAME", "value": task.name},
+            {"name": "PURR_TASK_SPEC", "value": task.spec.model_dump_json()},
+        ],
+        "securityContext": {
+            "allowPrivilegeEscalation": False,
+            "readOnlyRootFilesystem": True,
+            "capabilities": {"drop": ["ALL"]},
+        },
+    }
+    if cfg.worker_resources:
+        container["resources"] = cfg.worker_resources
     return {
         "apiVersion": "batch/v1",
         "kind": "Job",
@@ -65,24 +81,7 @@ def job_manifest(task: PlatformTask, cfg: Settings) -> JsonDict:
                         "runAsGroup": WORKER_UID,
                         "seccompProfile": {"type": "RuntimeDefault"},
                     },
-                    "containers": [
-                        {
-                            "name": WORKER_CONTAINER,
-                            "image": cfg.worker_image,
-                            "env": [
-                                {"name": "PURR_TASK_NAME", "value": task.name},
-                                {
-                                    "name": "PURR_TASK_SPEC",
-                                    "value": task.spec.model_dump_json(),
-                                },
-                            ],
-                            "securityContext": {
-                                "allowPrivilegeEscalation": False,
-                                "readOnlyRootFilesystem": True,
-                                "capabilities": {"drop": ["ALL"]},
-                            },
-                        }
-                    ],
+                    "containers": [container],
                 },
             },
         },

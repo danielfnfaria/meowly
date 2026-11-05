@@ -1,5 +1,6 @@
 {{- $ctx := dict "root" $ "component" "api" }}
-# Namespaced: the API creates and reads PlatformTasks and reads pods/logs of the executions.
+# Namespaced: the API only creates and reads PlatformTasks. No pods/log: the stdout of every
+# worker must not be reachable from an unauthenticated HTTP process.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -10,6 +11,3 @@ rules:
   - apiGroups: ["purr.sh"]
     resources: ["platformtasks"]
     verbs: ["create", "get", "list", "watch"]
-  - apiGroups: [""]
-    resources: ["pods", "pods/log"]
-    verbs: ["get", "list", "watch"]

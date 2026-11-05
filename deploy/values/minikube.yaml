@@ -5,7 +5,6 @@ postgresql:
   enabled: true
 
 api:
-  publicUrl: http://localhost:8000
   image:
     pullPolicy: IfNotPresent
   resources:

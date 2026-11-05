@@ -18,7 +18,7 @@ from purr_contracts import (
     encode_event,
 )
 from purr_controller.adapters.memory import MemoryKube
-from purr_controller.handlers import job_event, task_created, task_timer
+from purr_controller.handlers import job_event, runtime_of, task_created, task_timer
 from purr_controller.settings import Settings
 
 from .conftest import UID, WORKER_IMAGE, finished_status, make_body, old, stored
@@ -115,6 +115,40 @@ async def test_invalid_spec_fails_the_task_without_a_job(kube: MemoryKube, memo:
     ((_, status),) = kube.status_patches
     assert status.phase is TaskPhase.FAILED
     assert status.error == "validation_error"
+    # Never ran: without finished_at the TTL prune would never expire it.
+    assert status.started_at is not None
+    assert status.finished_at == status.started_at
+
+
+async def test_resume_after_the_job_already_finished_writes_the_final_status(
+    kube: MemoryKube, memo: kopf.Memo
+) -> None:
+    # The controller died after creating the Job: on resume the Job is done, and no further
+    # Job event will come. The create handler must not write a blind `running`.
+    body = make_body()
+    stored(kube, body)
+    kube.jobs["task-1"] = _job("task-1", succeeded=1)
+    kube.logs["task-1"] = _finished_line(finished_status(outputs={"a": "1"}))
+
+    await _created(body, memo)
+
+    ((_, status),) = kube.status_patches
+    assert status.phase is TaskPhase.SUCCEEDED
+    assert status.outputs == {"a": "1"}
+
+
+async def test_resume_after_the_job_failed_without_events_fails_the_task(
+    kube: MemoryKube, memo: kopf.Memo
+) -> None:
+    body = make_body()
+    stored(kube, body)
+    kube.jobs["task-1"] = _job("task-1", conditions=[{"type": "Failed", "status": "True"}])
+
+    await _created(body, memo)
+
+    ((_, status),) = kube.status_patches
+    assert (status.phase, status.error) == (TaskPhase.FAILED, "no_result")
+    assert status.finished_at is not None
 
 
 async def test_succeeded_job_writes_the_reported_status(kube: MemoryKube, memo: kopf.Memo) -> None:
@@ -192,6 +226,48 @@ async def _prune(kube: MemoryKube, memo: kopf.Memo, name: str) -> None:
     await task_timer(body=body, name=name, memo=memo)
 
 
+async def test_timer_reconciles_a_running_task_whose_job_already_ended(
+    kube: MemoryKube, memo: kopf.Memo
+) -> None:
+    stored(kube, make_body(status=TaskStatus(phase=TaskPhase.RUNNING, started_at=old(60))))
+    kube.jobs["task-1"] = _job("task-1", succeeded=1)
+    kube.logs["task-1"] = _finished_line(finished_status(outputs={"a": "1"}))
+
+    await _prune(kube, memo, "task-1")
+
+    ((_, status),) = kube.status_patches
+    assert status.phase is TaskPhase.SUCCEEDED
+    assert kube.deleted_tasks == []
+
+
+async def test_timer_fails_a_running_task_whose_job_is_gone(
+    kube: MemoryKube, memo: kopf.Memo
+) -> None:
+    started = old(60)
+    stored(kube, make_body(status=TaskStatus(phase=TaskPhase.RUNNING, started_at=started)))
+
+    await _prune(kube, memo, "task-1")
+
+    ((_, status),) = kube.status_patches
+    assert (status.phase, status.error) == (TaskPhase.FAILED, "job_missing")
+    assert status.started_at == started
+    assert status.finished_at is not None
+
+
+async def test_timer_leaves_alone_a_pending_task_without_a_job_and_an_active_job(
+    kube: MemoryKube, memo: kopf.Memo
+) -> None:
+    # Pending: the create handler has not made the Job yet; failing it would race that.
+    stored(kube, make_body("pending"))
+    stored(kube, make_body("active", status=TaskStatus(phase=TaskPhase.RUNNING)))
+    kube.jobs["active"] = _job("active", active=1)
+
+    await _prune(kube, memo, "pending")
+    await _prune(kube, memo, "active")
+
+    assert kube.status_patches == []
+
+
 async def test_ttl_prune_deletes_only_terminal_and_old_tasks(
     kube: MemoryKube, memo: kopf.Memo
 ) -> None:
@@ -211,3 +287,31 @@ async def test_ttl_prune_deletes_only_terminal_and_old_tasks(
         await _prune(kube, memo, name)
 
     assert kube.deleted_tasks == ["old-done"]
+
+
+async def test_the_job_carries_resources_and_pull_policy_from_settings(
+    kube: MemoryKube, memo: kopf.Memo, settings: Settings
+) -> None:
+    resources = {"requests": {"cpu": "50m"}, "limits": {"memory": "256Mi"}}
+    rt = runtime_of(memo)
+    configured = settings.model_copy(
+        update={"worker_resources": resources, "worker_image_pull_policy": "Always"}
+    )
+    memo["runtime"] = type(rt)(settings=configured, kube=kube)
+    body = make_body()
+    stored(kube, body)
+
+    await _created(body, memo)
+
+    container = kube.jobs["task-1"]["spec"]["template"]["spec"]["containers"][0]
+    assert container["resources"] == resources
+    assert container["imagePullPolicy"] == "Always"
+
+
+async def test_the_job_has_no_resources_key_when_none_are_configured(
+    kube: MemoryKube, memo: kopf.Memo
+) -> None:
+    body = make_body()
+    stored(kube, body)
+    await _created(body, memo)
+    assert "resources" not in kube.jobs["task-1"]["spec"]["template"]["spec"]["containers"][0]

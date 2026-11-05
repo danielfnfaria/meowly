@@ -4,6 +4,7 @@ The API server validates a PlatformTask against the chart's schema before any pu
 it, so a field added here and forgotten in the CRD is rejected at creation time — and one
 removed here but left there is accepted and then ignored. Neither is visible in review unless
 something checks, so this does (the rule is written down in `packages/contracts/CLAUDE.md`).
+It lives in the root `tests/` because it crosses code and chart, like the other checks there.
 """
 
 from pathlib import Path
@@ -14,7 +15,7 @@ import yaml
 
 from purr_contracts import TaskKind, TaskPhase, TaskSpec, TaskStatus
 
-CRD = Path(__file__).resolve().parents[3] / "deploy/charts/purr/templates/crds/platformtask.yaml"
+CRD = Path(__file__).resolve().parents[1] / "deploy/charts/purr/templates/crds/platformtask.yaml"
 
 
 def _properties() -> dict[str, Any]:

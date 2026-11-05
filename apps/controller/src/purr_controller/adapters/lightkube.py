@@ -6,6 +6,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from typing import Any, cast
 
+import structlog
 from lightkube import ApiError, AsyncClient
 from lightkube.generic_resource import create_namespaced_resource
 from lightkube.resources.batch_v1 import Job
@@ -25,6 +26,8 @@ from purr_contracts import (
 )
 from purr_controller.services.job import WORKER_CONTAINER
 
+log = structlog.get_logger(__name__)
+
 FIELD_MANAGER = "purr-controller"
 
 Task = create_namespaced_resource(GROUP, VERSION, KIND, PLURAL)
@@ -39,9 +42,12 @@ def _upstream(*ignore: int) -> Generator[None]:
     except ApiError as exc:
         if exc.status.code in ignore:
             return
-        raise UpstreamError(
-            f"kubernetes answered {exc.status.code}: {exc.status.message or exc.status.reason}"
-        ) from exc
+        # The cluster's message can name internals, and kopf persists an exception's message
+        # in the PlatformTask's annotations: it goes to the log, the error keeps the code.
+        log.warning(
+            "kube.error", code=exc.status.code, detail=exc.status.message or exc.status.reason
+        )
+        raise UpstreamError(f"kubernetes answered {exc.status.code}") from exc
 
 
 class LightkubeKube:
@@ -60,10 +66,6 @@ class LightkubeKube:
             job = await self._client.get(Job, name, namespace=self._ns)
             return cast(JsonDict, job.to_dict())
         return None
-
-    async def delete_job(self, name: str) -> None:
-        with _upstream(404):
-            await self._client.delete(Job, name, namespace=self._ns, cascade=CascadeType.BACKGROUND)
 
     async def pod_log(self, job_name: str) -> str:
         with _upstream(400, 404):  # pod gone, or its container never started

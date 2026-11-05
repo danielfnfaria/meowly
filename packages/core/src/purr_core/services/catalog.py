@@ -74,7 +74,16 @@ class _CatalogService[T: EntityMixin]:
         return entity
 
     async def delete(self, slug: str) -> None:
-        await self._repo.delete(await self.get_by_slug(slug))
+        entity = await self.get_by_slug(slug)
+        try:
+            await self._repo.delete(entity)
+        except IntegrityError as exc:
+            # The translation lives here, not in the generic repository: only the service
+            # knows the caller can fix this (remove what still points at the entity) and so
+            # that it is a conflict, not a 500. The FK is what enforces it, in the database.
+            raise ConflictError(
+                f"{self.label} {slug!r} is still referenced by other objects"
+            ) from exc
 
 
 def _apply(entity: object, fields: dict[str, object]) -> None:

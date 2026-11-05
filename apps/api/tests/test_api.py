@@ -168,3 +168,13 @@ async def test_the_error_body_is_in_the_schema_not_only_in_the_handler(
     failed = await client.get("/v1/components/nope")
     assert failed.status_code == 404
     assert set(failed.json()) == {"code", "message"}
+
+
+async def test_deleting_an_owner_with_components_answers_409(client: httpx.AsyncClient) -> None:
+    owner_id = await make_owner(client)
+    assert (await client.post("/v1/components", json=component_body(owner_id))).status_code == 201
+    response = await client.delete("/v1/owners/platform")
+    assert response.status_code == 409
+    body = response.json()
+    assert set(body) == {"code", "message"}
+    assert "still referenced" in body["message"]

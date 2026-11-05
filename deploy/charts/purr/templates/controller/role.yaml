@@ -9,13 +9,15 @@ metadata:
 rules:
   - apiGroups: ["purr.sh"]
     resources: ["platformtasks"]
-    verbs: ["get", "list", "watch", "create", "patch", "delete"]
+    # No create: only the API creates tasks. delete is the TTL prune.
+    verbs: ["get", "list", "watch", "patch", "delete"]
   - apiGroups: ["purr.sh"]
     resources: ["platformtasks/status"]
     verbs: ["get", "patch", "update"]
   - apiGroups: ["batch"]
     resources: ["jobs"]
-    verbs: ["create", "get", "list", "watch", "delete"]
+    # No delete: the Job goes with its task through the ownerReference.
+    verbs: ["create", "get", "list", "watch"]
   - apiGroups: [""]
     resources: ["pods", "pods/log"]
     verbs: ["get", "list", "watch"]

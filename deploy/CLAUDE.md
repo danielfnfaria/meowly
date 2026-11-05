@@ -19,10 +19,12 @@ de `version` no `Chart.yaml`) ou pelo overlay em `deploy/values/`.
 
 Tudo *namespaced*; não existe ClusterRole no chart.
 
-- **controller**: `platformtasks` (get/list/watch/create/patch/delete) + `platformtasks/status`
-  (get/patch/update) + `jobs` (create/get/list/watch/delete) + `pods` e `pods/log`
-  (get/list/watch) + `events` (create/patch). É o **único** escritor de status.
-- **api**: cria e lê `platformtasks`, lê `pods`/`pods/log`. Não mexe em Job.
+- **controller**: `platformtasks` (get/list/watch/patch/delete; o `delete` é a poda por TTL, e
+  não há `create`: só a API cria tasks) + `platformtasks/status` (get/patch/update) + `jobs`
+  (create/get/list/watch; sem `delete`, o Job some com a task pelo `ownerReference`) + `pods` e
+  `pods/log` (get/list/watch) + `events` (create/patch). É o **único** escritor de status.
+- **api**: `platformtasks` (create/get/list/watch) e nada mais. Sem `pods`/`pods/log`: o
+  stdout dos workers não fica ao alcance de um processo HTTP sem autenticação. Não mexe em Job.
 - **worker**: nada, e o Job sobe com `automountServiceAccountToken: false` — o pod não fala com
   o API server.
 

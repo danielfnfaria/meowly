@@ -74,6 +74,11 @@ class KubernetesTaskStore:
             raise self._upstream(exc) from exc
         return self._parse(found)
 
+    async def close(self) -> None:
+        # The client keeps an httpx connection pool open; closing it at shutdown avoids
+        # leaking sockets and the "unclosed client" warning.
+        await self._client.close()
+
     @staticmethod
     def _parse(resource: Any) -> PlatformTask:
         body = cast("dict[str, Any]", resource.to_dict())

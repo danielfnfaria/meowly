@@ -48,7 +48,7 @@ manifests:
           controller.image.tag: "{{.IMAGE_TAG_purr_controller}}"
           worker.image.repository: "{{.IMAGE_REPO_purr_worker}}"
           worker.image.tag: "{{.IMAGE_TAG_purr_worker}}"
-        version: 0.1.0
+        version: 0.1.1
 
 deploy:
   kubeContext: minikube

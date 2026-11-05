@@ -23,3 +23,8 @@ class TaskStore(Protocol):
     async def get(self, name: str) -> PlatformTask:
         """Raises `NotFoundError` when no task has that name."""
         ...
+
+    async def close(self) -> None:
+        """Release the client held for the cluster (its connection pool); called once at
+        shutdown."""
+        ...
