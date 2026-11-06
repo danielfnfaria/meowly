@@ -1,6 +1,6 @@
-# purr
+# meowly
 
-**purr** é uma *Internal Developer Platform*: o catálogo do que a engenharia tem — componentes,
+**meowly** é uma *Internal Developer Platform*: o catálogo do que a engenharia tem — componentes,
 times, templates e ambientes — numa interface administrativa, e o autosserviço sobre esse
 catálogo. Cada pedido (criar um serviço a partir de um template, provisionar um recurso, rodar
 uma ação de plataforma) vira um objeto Kubernetes, executado num pod isolado e acompanhado pela
@@ -22,7 +22,7 @@ ADRs em [`docs/adr/`](docs/adr).
 | `packages/engine` | O motor que roda uma task: um step por `kind`, emitindo eventos |
 | `packages/http` | HTTP comum: skeleton do app, erros → status, health, limite de corpo, access log |
 | `packages/runtime` | O comum de todo processo: logging JSON e as settings de bind do servidor |
-| `deploy/` | Helm chart único (`deploy/charts/purr`: CRD `PlatformTask`, API, controller, identidade do worker e Postgres de dev) e o overlay do minikube |
+| `deploy/` | Helm chart único (`deploy/charts/meowly`: CRD `PlatformTask`, API, controller, identidade do worker e Postgres de dev) e o overlay do minikube |
 
 **Postgres é a fonte de verdade do catálogo; Kubernetes, das execuções.** Nenhuma execução vira
 linha de tabela (ADR 0002) e nenhum item de catálogo vive no cluster (ADR 0004).
@@ -45,7 +45,7 @@ make ui          # opcional: a UI deste checkout com hot reload em :5173
 make down
 ```
 
-Aqui a API sobe com `PURR_LAUNCHER=memory`: criar uma task a registra como `pending` e **nada
+Aqui a API sobe com `MEOWLY_LAUNCHER=memory`: criar uma task a registra como `pending` e **nada
 a executa**. É o suficiente para trabalhar no catálogo e na interface.
 
 ### O produto inteiro, com execução de verdade
@@ -58,8 +58,8 @@ make minikube-dev     # build das três imagens no Docker do minikube + helm ins
 O ciclo completo fica visível no cluster:
 
 ```bash
-kubectl --context minikube -n purr get platformtasks
-kubectl --context minikube -n purr logs job/<nome-da-task>
+kubectl --context minikube -n meowly get platformtasks
+kubectl --context minikube -n meowly logs job/<nome-da-task>
 ```
 
 ## Qualidade

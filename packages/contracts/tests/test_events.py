@@ -1,4 +1,4 @@
-from purr_contracts import TaskEvent, TaskEventType, decode_event, encode_event
+from meowly_contracts import TaskEvent, TaskEventType, decode_event, encode_event
 
 
 def test_an_event_survives_a_round_trip() -> None:

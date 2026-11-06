@@ -1,13 +1,13 @@
 [project]
-name = "purr-api"
+name = "meowly-api"
 version = "0.1.0"
-description = "purr API: the catalog and the tasks over HTTP under /v1, and the admin UI on /"
+description = "meowly API: the catalog and the tasks over HTTP under /v1, and the admin UI on /"
 requires-python = ">=3.13"
 dependencies = [
-    "purr-contracts",
-    "purr-runtime",
-    "purr-core[migrations]",
-    "purr-http",
+    "meowly-contracts",
+    "meowly-runtime",
+    "meowly-core[migrations]",
+    "meowly-http",
     "fastapi>=0.116",
     "pydantic>=2.11",
     "sqlalchemy[asyncio]>=2.0.43",
@@ -21,11 +21,11 @@ dev = [
 ]
 
 [project.scripts]
-purr-api = "purr_api.main:run"
+meowly-api = "meowly_api.main:run"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/purr_api"]
+packages = ["src/meowly_api"]

@@ -1,7 +1,7 @@
 [project]
-name = "purr-contracts"
+name = "meowly-contracts"
 version = "0.1.0"
-description = "purr contracts: the wire between the API, the controller and the worker (task specs, statuses, events, the PlatformTask envelope and the domain errors)"
+description = "meowly contracts: the wire between the API, the controller and the worker (task specs, statuses, events, the PlatformTask envelope and the domain errors)"
 requires-python = ">=3.13"
 dependencies = [
     "pydantic>=2.11",
@@ -12,4 +12,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/purr_contracts"]
+packages = ["src/meowly_contracts"]

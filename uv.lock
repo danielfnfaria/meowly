@@ -4,15 +4,15 @@ requires-python = ">=3.13"
 
 [manifest]
 members = [
-    "purr-api",
-    "purr-contracts",
-    "purr-controller",
-    "purr-core",
-    "purr-engine",
-    "purr-http",
-    "purr-runtime",
-    "purr-worker",
-    "purr-workspace",
+    "meowly-api",
+    "meowly-contracts",
+    "meowly-controller",
+    "meowly-core",
+    "meowly-engine",
+    "meowly-http",
+    "meowly-runtime",
+    "meowly-worker",
+    "meowly-workspace",
 ]
 
 [[package]]
@@ -1070,6 +1070,244 @@ wheels = [
 ]
 
 [[package]]
+name = "meowly-api"
+version = "0.1.0"
+source = { editable = "apps/api" }
+dependencies = [
+    { name = "fastapi" },
+    { name = "meowly-contracts" },
+    { name = "meowly-core", extra = ["migrations"] },
+    { name = "meowly-http" },
+    { name = "meowly-runtime" },
+    { name = "pydantic" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
+    { name = "structlog" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "aiosqlite" },
+    { name = "httpx" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi", specifier = ">=0.116" },
+    { name = "meowly-contracts", editable = "packages/contracts" },
+    { name = "meowly-core", extras = ["migrations"], editable = "packages/core" },
+    { name = "meowly-http", editable = "packages/http" },
+    { name = "meowly-runtime", editable = "packages/runtime" },
+    { name = "pydantic", specifier = ">=2.11" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.43" },
+    { name = "structlog", specifier = ">=25" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "aiosqlite", specifier = ">=0.21" },
+    { name = "httpx", specifier = ">=0.28" },
+]
+
+[[package]]
+name = "meowly-contracts"
+version = "0.1.0"
+source = { editable = "packages/contracts" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.11" }]
+
+[[package]]
+name = "meowly-controller"
+version = "0.1.0"
+source = { editable = "apps/controller" }
+dependencies = [
+    { name = "kopf" },
+    { name = "lightkube" },
+    { name = "meowly-contracts" },
+    { name = "meowly-runtime" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "structlog" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "kopf", specifier = ">=1.37" },
+    { name = "lightkube", specifier = ">=0.17" },
+    { name = "meowly-contracts", editable = "packages/contracts" },
+    { name = "meowly-runtime", editable = "packages/runtime" },
+    { name = "pydantic", specifier = ">=2.11" },
+    { name = "pydantic-settings", specifier = ">=2.10" },
+    { name = "structlog", specifier = ">=25" },
+]
+
+[[package]]
+name = "meowly-core"
+version = "0.1.0"
+source = { editable = "packages/core" }
+dependencies = [
+    { name = "asyncpg" },
+    { name = "lightkube" },
+    { name = "meowly-contracts" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
+    { name = "structlog" },
+]
+
+[package.optional-dependencies]
+migrations = [
+    { name = "alembic" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "aiosqlite" },
+    { name = "alembic" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "alembic", marker = "extra == 'migrations'", specifier = ">=1.16" },
+    { name = "asyncpg", specifier = ">=0.30" },
+    { name = "lightkube", specifier = ">=0.17" },
+    { name = "meowly-contracts", editable = "packages/contracts" },
+    { name = "pydantic", specifier = ">=2.11" },
+    { name = "pydantic-settings", specifier = ">=2.10" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.43" },
+    { name = "structlog", specifier = ">=25" },
+]
+provides-extras = ["migrations"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "aiosqlite", specifier = ">=0.21" },
+    { name = "alembic", specifier = ">=1.16" },
+]
+
+[[package]]
+name = "meowly-engine"
+version = "0.1.0"
+source = { editable = "packages/engine" }
+dependencies = [
+    { name = "meowly-contracts" },
+    { name = "structlog" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "meowly-contracts", editable = "packages/contracts" },
+    { name = "structlog", specifier = ">=25" },
+]
+
+[[package]]
+name = "meowly-http"
+version = "0.1.0"
+source = { editable = "packages/http" }
+dependencies = [
+    { name = "fastapi" },
+    { name = "meowly-contracts" },
+    { name = "meowly-runtime" },
+    { name = "starlette" },
+    { name = "structlog" },
+    { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "httpx" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi", specifier = ">=0.116" },
+    { name = "meowly-contracts", editable = "packages/contracts" },
+    { name = "meowly-runtime", editable = "packages/runtime" },
+    { name = "starlette" },
+    { name = "structlog", specifier = ">=25" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.34" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "httpx", specifier = ">=0.28" }]
+
+[[package]]
+name = "meowly-runtime"
+version = "0.1.0"
+source = { editable = "packages/runtime" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "structlog" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.11" },
+    { name = "pydantic-settings", specifier = ">=2.10" },
+    { name = "structlog", specifier = ">=25" },
+]
+
+[[package]]
+name = "meowly-worker"
+version = "0.1.0"
+source = { editable = "apps/worker" }
+dependencies = [
+    { name = "meowly-contracts" },
+    { name = "meowly-engine" },
+    { name = "meowly-runtime" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "structlog" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "meowly-contracts", editable = "packages/contracts" },
+    { name = "meowly-engine", editable = "packages/engine" },
+    { name = "meowly-runtime", editable = "packages/runtime" },
+    { name = "pydantic", specifier = ">=2.11" },
+    { name = "pydantic-settings", specifier = ">=2.10" },
+    { name = "structlog", specifier = ">=25" },
+]
+
+[[package]]
+name = "meowly-workspace"
+version = "0.0.0"
+source = { virtual = "." }
+
+[package.dev-dependencies]
+dev = [
+    { name = "import-linter" },
+    { name = "pyright" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "pytest-xdist" },
+    { name = "pyyaml" },
+    { name = "ruff" },
+    { name = "types-pyyaml" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "import-linter", specifier = ">=2.1" },
+    { name = "pyright", specifier = ">=1.1.405" },
+    { name = "pytest", specifier = ">=8.4" },
+    { name = "pytest-asyncio", specifier = ">=1.1" },
+    { name = "pytest-cov", specifier = ">=6" },
+    { name = "pytest-xdist", specifier = ">=3.8" },
+    { name = "pyyaml", specifier = ">=6" },
+    { name = "ruff", specifier = ">=0.13" },
+    { name = "types-pyyaml", specifier = ">=6" },
+]
+
+[[package]]
 name = "msgspec"
 version = "0.22.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1377,244 +1615,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/d4/ef/8bae0a316d406644450522f2f3d44a4e19632f5f3bb60d1d0e6c53842616/propcache-0.5.4-cp315-cp315t-win_amd64.whl", hash = "sha256:02c0a34f16889cf800f10f0247a564d8ce6eeab6ffcd7c87198f769067eb8432", size = 48574, upload-time = "2026-09-16T00:17:10.077Z" },
     { url = "https://files.pythonhosted.org/packages/57/be/bcc053f66a97355683884b448198e79580fae8e8fa4d96b9bb01614e9913/propcache-0.5.4-cp315-cp315t-win_arm64.whl", hash = "sha256:dc4242ca653c9b30ab51c5f8193323e7bc0928f897ee9103201e59a43abcb72e", size = 45625, upload-time = "2026-09-16T00:17:11.377Z" },
     { url = "https://files.pythonhosted.org/packages/f5/cd/785c64ed382f3f04201870267b02783f63b4678c2acfddc177a3ebcc2727/propcache-0.5.4-py3-none-any.whl", hash = "sha256:62c60aec739ed00124573cce1178138fd690c7676352d67a37328c1cf51d7468", size = 16338, upload-time = "2026-09-16T00:17:13.106Z" },
-]
-
-[[package]]
-name = "purr-api"
-version = "0.1.0"
-source = { editable = "apps/api" }
-dependencies = [
-    { name = "fastapi" },
-    { name = "purr-contracts" },
-    { name = "purr-core", extra = ["migrations"] },
-    { name = "purr-http" },
-    { name = "purr-runtime" },
-    { name = "pydantic" },
-    { name = "sqlalchemy", extra = ["asyncio"] },
-    { name = "structlog" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "aiosqlite" },
-    { name = "httpx" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fastapi", specifier = ">=0.116" },
-    { name = "purr-contracts", editable = "packages/contracts" },
-    { name = "purr-core", extras = ["migrations"], editable = "packages/core" },
-    { name = "purr-http", editable = "packages/http" },
-    { name = "purr-runtime", editable = "packages/runtime" },
-    { name = "pydantic", specifier = ">=2.11" },
-    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.43" },
-    { name = "structlog", specifier = ">=25" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "aiosqlite", specifier = ">=0.21" },
-    { name = "httpx", specifier = ">=0.28" },
-]
-
-[[package]]
-name = "purr-contracts"
-version = "0.1.0"
-source = { editable = "packages/contracts" }
-dependencies = [
-    { name = "pydantic" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "pydantic", specifier = ">=2.11" }]
-
-[[package]]
-name = "purr-controller"
-version = "0.1.0"
-source = { editable = "apps/controller" }
-dependencies = [
-    { name = "kopf" },
-    { name = "lightkube" },
-    { name = "purr-contracts" },
-    { name = "purr-runtime" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "structlog" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "kopf", specifier = ">=1.37" },
-    { name = "lightkube", specifier = ">=0.17" },
-    { name = "purr-contracts", editable = "packages/contracts" },
-    { name = "purr-runtime", editable = "packages/runtime" },
-    { name = "pydantic", specifier = ">=2.11" },
-    { name = "pydantic-settings", specifier = ">=2.10" },
-    { name = "structlog", specifier = ">=25" },
-]
-
-[[package]]
-name = "purr-core"
-version = "0.1.0"
-source = { editable = "packages/core" }
-dependencies = [
-    { name = "asyncpg" },
-    { name = "lightkube" },
-    { name = "purr-contracts" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "sqlalchemy", extra = ["asyncio"] },
-    { name = "structlog" },
-]
-
-[package.optional-dependencies]
-migrations = [
-    { name = "alembic" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "aiosqlite" },
-    { name = "alembic" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "alembic", marker = "extra == 'migrations'", specifier = ">=1.16" },
-    { name = "asyncpg", specifier = ">=0.30" },
-    { name = "lightkube", specifier = ">=0.17" },
-    { name = "purr-contracts", editable = "packages/contracts" },
-    { name = "pydantic", specifier = ">=2.11" },
-    { name = "pydantic-settings", specifier = ">=2.10" },
-    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.43" },
-    { name = "structlog", specifier = ">=25" },
-]
-provides-extras = ["migrations"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "aiosqlite", specifier = ">=0.21" },
-    { name = "alembic", specifier = ">=1.16" },
-]
-
-[[package]]
-name = "purr-engine"
-version = "0.1.0"
-source = { editable = "packages/engine" }
-dependencies = [
-    { name = "purr-contracts" },
-    { name = "structlog" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "purr-contracts", editable = "packages/contracts" },
-    { name = "structlog", specifier = ">=25" },
-]
-
-[[package]]
-name = "purr-http"
-version = "0.1.0"
-source = { editable = "packages/http" }
-dependencies = [
-    { name = "fastapi" },
-    { name = "purr-contracts" },
-    { name = "purr-runtime" },
-    { name = "starlette" },
-    { name = "structlog" },
-    { name = "uvicorn", extra = ["standard"] },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "httpx" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fastapi", specifier = ">=0.116" },
-    { name = "purr-contracts", editable = "packages/contracts" },
-    { name = "purr-runtime", editable = "packages/runtime" },
-    { name = "starlette" },
-    { name = "structlog", specifier = ">=25" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.34" },
-]
-
-[package.metadata.requires-dev]
-dev = [{ name = "httpx", specifier = ">=0.28" }]
-
-[[package]]
-name = "purr-runtime"
-version = "0.1.0"
-source = { editable = "packages/runtime" }
-dependencies = [
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "structlog" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "pydantic", specifier = ">=2.11" },
-    { name = "pydantic-settings", specifier = ">=2.10" },
-    { name = "structlog", specifier = ">=25" },
-]
-
-[[package]]
-name = "purr-worker"
-version = "0.1.0"
-source = { editable = "apps/worker" }
-dependencies = [
-    { name = "purr-contracts" },
-    { name = "purr-engine" },
-    { name = "purr-runtime" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "structlog" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "purr-contracts", editable = "packages/contracts" },
-    { name = "purr-engine", editable = "packages/engine" },
-    { name = "purr-runtime", editable = "packages/runtime" },
-    { name = "pydantic", specifier = ">=2.11" },
-    { name = "pydantic-settings", specifier = ">=2.10" },
-    { name = "structlog", specifier = ">=25" },
-]
-
-[[package]]
-name = "purr-workspace"
-version = "0.0.0"
-source = { virtual = "." }
-
-[package.dev-dependencies]
-dev = [
-    { name = "import-linter" },
-    { name = "pyright" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-cov" },
-    { name = "pytest-xdist" },
-    { name = "pyyaml" },
-    { name = "ruff" },
-    { name = "types-pyyaml" },
-]
-
-[package.metadata]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "import-linter", specifier = ">=2.1" },
-    { name = "pyright", specifier = ">=1.1.405" },
-    { name = "pytest", specifier = ">=8.4" },
-    { name = "pytest-asyncio", specifier = ">=1.1" },
-    { name = "pytest-cov", specifier = ">=6" },
-    { name = "pytest-xdist", specifier = ">=3.8" },
-    { name = "pyyaml", specifier = ">=6" },
-    { name = "ruff", specifier = ">=0.13" },
-    { name = "types-pyyaml", specifier = ">=6" },
 ]
 
 [[package]]

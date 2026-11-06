@@ -4,7 +4,7 @@ Status: accepted (2026-11-05).
 
 ## Context
 
-purr is a monorepo of three processes (API, controller, worker) that share a wire format and
+meowly is a monorepo of three processes (API, controller, worker) that share a wire format and
 some plumbing. In every monorepo that grows without a rule, one process ends up importing
 another to get at a library it happens to hold; the images get heavier, the boundaries blur,
 and a change to the API breaks the pod that runs tasks.
@@ -13,21 +13,21 @@ and a change to the API breaks the pod that runs tasks.
 
 1. **An app is one process and one image** (`apps/<name>`, its own `Dockerfile` and
    entrypoint) and **never imports another app**.
-2. **Shared code lives in `packages/`**: distribution `purr-<name>`, Python package
-   `purr_<name>`, same layout as an app (`pyproject.toml`, `src/<package>/` with `py.typed`,
+2. **Shared code lives in `packages/`**: distribution `meowly-<name>`, Python package
+   `meowly_<name>`, same layout as an app (`pyproject.toml`, `src/<package>/` with `py.typed`,
    `tests/`), no `Dockerfile`.
 3. **Dependency directions**: apps → packages, never apps → apps; packages never import apps.
    The layers are `contracts` ← `core` ← `http` and `contracts` ← `engine`, with `runtime` as
    a leaf everyone uses.
-   - `purr_contracts` imports no other workspace package: it is the wire (specs, statuses,
+   - `meowly_contracts` imports no other workspace package: it is the wire (specs, statuses,
      events, the CR envelope, the domain errors).
-   - `purr_runtime` is process plumbing only (structlog + pydantic-settings): JSON logging and
+   - `meowly_runtime` is process plumbing only (structlog + pydantic-settings): JSON logging and
      the bind settings. It imports no workspace package either.
-   - `purr_engine` imports neither `purr_core` nor `purr_http`: it runs inside a worker pod
+   - `meowly_engine` imports neither `meowly_core` nor `meowly_http`: it runs inside a worker pod
      that has no database and serves no HTTP (ADR 0002).
-   - `purr_core` imports neither `purr_engine` nor `purr_http`: the catalog knows nothing
+   - `meowly_core` imports neither `meowly_engine` nor `meowly_http`: the catalog knows nothing
      about executing a task or about HTTP.
-   - **The controller and the worker import neither `purr_core` nor `purr_http`**: the
+   - **The controller and the worker import neither `meowly_core` nor `meowly_http`**: the
      controller only turns a CR into a Job, and the worker only runs the spec it was handed.
      Their images carry no SQLAlchemy, no Alembic and no web framework.
 4. **import-linter enforces it**, not a review habit: the contracts live in

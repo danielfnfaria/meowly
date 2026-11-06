@@ -1,4 +1,4 @@
-"""Async migration environment. The URL is read from PURR_DATABASE_URL so the same image
+"""Async migration environment. The URL is read from MEOWLY_DATABASE_URL so the same image
 migrates any environment."""
 
 import asyncio
@@ -8,13 +8,13 @@ from alembic import context
 from sqlalchemy import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from purr_core.models import Base
+from meowly_core.models import Base
 
 target_metadata = Base.metadata
 
 
 def _url() -> str:
-    return os.environ["PURR_DATABASE_URL"]
+    return os.environ["MEOWLY_DATABASE_URL"]
 
 
 def _run(connection: Connection) -> None:

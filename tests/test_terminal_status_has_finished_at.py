@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 import kopf
 import pytest
 
-from purr_contracts import (
+from meowly_contracts import (
     MANAGED_BY,
     MANAGED_BY_LABEL,
     TASK_LABEL,
@@ -26,16 +26,16 @@ from purr_contracts import (
     task_body,
     task_from_body,
 )
-from purr_controller.adapters.memory import MemoryKube
-from purr_controller.handlers import Runtime, job_event, task_created, task_timer
-from purr_controller.settings import Settings
+from meowly_controller.adapters.memory import MemoryKube
+from meowly_controller.handlers import Runtime, job_event, task_created, task_timer
+from meowly_controller.settings import Settings
 
 NAME = "task-1"
 
 
 def _body(*, status: TaskStatus | None = None, kind: str = "noop") -> JsonDict:
     spec = TaskSpec(kind=TaskKind.NOOP, requested_by="tester")
-    body = task_body(NAME, namespace="purr", spec=spec)
+    body = task_body(NAME, namespace="meowly", spec=spec)
     body["metadata"]["uid"] = "7b6c1d2e-0000-0000-0000-000000000001"
     body["spec"]["kind"] = kind
     if status is not None:
@@ -93,7 +93,7 @@ async def test_no_terminal_status_leaves_the_controller_without_finished_at(case
     kube = MemoryKube()
     memo = kopf.Memo()
     memo["runtime"] = Runtime(settings=Settings(worker_image="img"), kube=kube)
-    # The invalid-spec case: the API server holds it, purr cannot parse it.
+    # The invalid-spec case: the API server holds it, meowly cannot parse it.
     with suppress(ValueError):
         kube.tasks[NAME] = task_from_body(body)
     if job is not None:

@@ -1,5 +1,5 @@
 {
-  "name": "purr-ui",
+  "name": "meowly-ui",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -13,7 +13,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "generate-api": "openapi-typescript ${OPENAPI_URL:-http://localhost:8000/v1/openapi.json} -o src/api/schema.d.ts && prettier --write src/api/schema.d.ts",
-    "generate-api:local": "(cd ../.. && uv run --package purr-api python -m purr_api.openapi) > openapi.json && openapi-typescript openapi.json -o src/api/schema.d.ts && prettier --write src/api/schema.d.ts && rm openapi.json",
+    "generate-api:local": "(cd ../.. && uv run --package meowly-api python -m meowly_api.openapi) > openapi.json && openapi-typescript openapi.json -o src/api/schema.d.ts && prettier --write src/api/schema.d.ts && rm openapi.json",
     "check-api": "openapi-typescript openapi.json | prettier --stdin-filepath src/api/schema.d.ts | diff -u src/api/schema.d.ts - || (echo 'src/api/schema.d.ts is out of date with the API: run npm run generate-api:local' >&2 && exit 1)"
   },
   "dependencies": {

@@ -1,0 +1,26 @@
+{{- $ctx := dict "root" $ "component" "controller" }}
+# Namespaced on purpose (no ClusterRole): the controller only watches the release namespace.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "meowly.componentName" $ctx }}
+  labels:
+    {{- include "meowly.componentLabels" $ctx | nindent 4 }}
+rules:
+  - apiGroups: ["meowly.dev"]
+    resources: ["platformtasks"]
+    # No create: only the API creates tasks. delete is the TTL prune.
+    verbs: ["get", "list", "watch", "patch", "delete"]
+  - apiGroups: ["meowly.dev"]
+    resources: ["platformtasks/status"]
+    verbs: ["get", "patch", "update"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    # No delete: the Job goes with its task through the ownerReference.
+    verbs: ["create", "get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]

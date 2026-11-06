@@ -3,7 +3,7 @@ from collections.abc import Mapping
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from purr_contracts import (
+from meowly_contracts import (
     COMPONENT_LABEL,
     TASK_LABEL,
     NotFoundError,
@@ -11,8 +11,8 @@ from purr_contracts import (
     TaskKind,
     TaskSpec,
 )
-from purr_core import Component, InMemoryTaskStore, Owner, build_core
-from purr_core.repositories import ComponentRepository, OwnerRepository
+from meowly_core import Component, InMemoryTaskStore, Owner, build_core
+from meowly_core.repositories import ComponentRepository, OwnerRepository
 
 
 def _spec(component: str | None = None) -> TaskSpec:

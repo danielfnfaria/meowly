@@ -1,0 +1,109 @@
+{{- $ctx := dict "root" $ "component" "api" }}
+{{- $b := .Values.api }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "meowly.componentName" $ctx }}
+  labels:
+    {{- include "meowly.componentLabels" $ctx | nindent 4 }}
+spec:
+  replicas: {{ $b.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "meowly.selectorLabels" $ctx | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "meowly.componentLabels" $ctx | nindent 8 }}
+      {{- if not $b.database.existingSecret }}
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/api/secret.yaml") . | sha256sum }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "meowly.componentName" $ctx }}
+      terminationGracePeriodSeconds: {{ include "meowly.terminationGracePeriodSeconds" . }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: migrate
+          image: {{ include "meowly.image" (dict "root" $ "image" $b.image) | quote }}
+          imagePullPolicy: {{ $b.image.pullPolicy }}
+          command: ["alembic", "upgrade", "head"]
+          env:
+            - name: MEOWLY_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "meowly.databaseSecretName" . }}
+                  key: {{ include "meowly.databaseSecretKey" . }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            {{- toYaml $b.resources | nindent 12 }}
+      containers:
+        - name: api
+          image: {{ include "meowly.image" (dict "root" $ "image" $b.image) | quote }}
+          imagePullPolicy: {{ $b.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $b.port }}
+              protocol: TCP
+          env:
+            - name: MEOWLY_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "meowly.databaseSecretName" . }}
+                  key: {{ include "meowly.databaseSecretKey" . }}
+            - name: MEOWLY_LOG_LEVEL
+              value: {{ $b.logLevel | quote }}
+            - name: MEOWLY_LAUNCHER
+              value: "kubernetes"
+            - name: MEOWLY_EXECUTION_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: MEOWLY_HOST
+              value: "0.0.0.0"
+            - name: MEOWLY_PORT
+              value: {{ $b.port | quote }}
+            - name: MEOWLY_SHUTDOWN_TIMEOUT_SECONDS
+              value: {{ $b.shutdown.timeoutSeconds | quote }}
+            - name: MEOWLY_UI_DIR
+              value: "/app/ui"
+            - name: MEOWLY_MAX_BODY_BYTES
+              value: {{ $b.maxBodyBytes | quote }}
+            - name: MEOWLY_DB_POOL_SIZE
+              value: {{ $b.database.pool.size | quote }}
+            - name: MEOWLY_DB_MAX_OVERFLOW
+              value: {{ $b.database.pool.maxOverflow | quote }}
+          startupProbe:
+            httpGet:
+              path: /healthz/ready
+              port: http
+            {{- toYaml $b.probes.startup | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /healthz/ready
+              port: http
+            {{- toYaml $b.probes.readiness | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz/live
+              port: http
+            {{- toYaml $b.probes.liveness | nindent 12 }}
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: {{ $b.preStop.sleepSeconds }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            {{- toYaml $b.resources | nindent 12 }}

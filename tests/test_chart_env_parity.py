@@ -1,4 +1,4 @@
-"""Every `PURR_*` variable the chart injects into a process must be a field of that process's
+"""Every `MEOWLY_*` variable the chart injects into a process must be a field of that process's
 `Settings`.
 
 The Settings use `extra="ignore"`, so a variable that was renamed (or removed) in the code but
@@ -19,12 +19,12 @@ import pytest
 import yaml
 from pydantic_settings import BaseSettings
 
-from purr_api.settings import ServerSettings as ApiServerSettings
-from purr_api.settings import Settings as ApiSettings
-from purr_controller.settings import Settings as ControllerSettings
+from meowly_api.settings import ServerSettings as ApiServerSettings
+from meowly_api.settings import Settings as ApiSettings
+from meowly_controller.settings import Settings as ControllerSettings
 
-CHART = Path(__file__).resolve().parents[1] / "deploy/charts/purr"
-PREFIX = "PURR_"
+CHART = Path(__file__).resolve().parents[1] / "deploy/charts/meowly"
+PREFIX = "MEOWLY_"
 
 
 def _render() -> list[dict[str, Any]]:
@@ -33,7 +33,7 @@ def _render() -> list[dict[str, Any]]:
     if not CHART.is_dir():
         pytest.skip("the chart is not in this tree")
     out = subprocess.run(
-        ["helm", "template", "--kube-version", "1.30.0", "purr", str(CHART), "-n", "purr"],
+        ["helm", "template", "--kube-version", "1.30.0", "meowly", str(CHART), "-n", "meowly"],
         check=True,
         capture_output=True,
         text=True,
@@ -67,7 +67,7 @@ def _env(docs: list[dict[str, Any]], component: str) -> dict[str, dict[str, Any]
         ("controller", _fields(ControllerSettings)),
     ],
 )
-def test_every_purr_variable_the_chart_sets_is_a_settings_field(
+def test_every_meowly_variable_the_chart_sets_is_a_settings_field(
     component: str, fields: set[str]
 ) -> None:
     env = _env(_render(), component)
@@ -80,6 +80,6 @@ def test_every_purr_variable_the_chart_sets_is_a_settings_field(
 
 
 def test_the_worker_resources_the_chart_renders_parse_into_the_controller_settings() -> None:
-    entry = _env(_render(), "controller")["PURR_WORKER_RESOURCES"]
+    entry = _env(_render(), "controller")["MEOWLY_WORKER_RESOURCES"]
     settings = ControllerSettings(worker_image="x", worker_resources=json.loads(entry["value"]))
     assert settings.worker_resources["limits"]["memory"]

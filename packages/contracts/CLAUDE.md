@@ -1,6 +1,6 @@
 # packages/contracts — o fio entre os processos
 
-`purr_contracts` é o que a API, o controller e o worker combinam entre si. **Não importa nenhum
+`meowly_contracts` é o que a API, o controller e o worker combinam entre si. **Não importa nenhum
 outro pacote do workspace** (import-linter trava isso): é a camada que todos podem depender sem
 arrastar banco, HTTP nem cliente de Kubernetes.
 
@@ -10,8 +10,8 @@ arrastar banco, HTTP nem cliente de Kubernetes.
 | `enums.py` | `TaskKind` (`noop`, `scaffold`, `provision`) e `TaskPhase`, com `phase.terminal` |
 | `events.py` | `TaskEvent` + `encode_event`/`decode_event` (o JSONL do pod) e a convenção do evento final: `finished_data`/`status_from_event` |
 | `platformtask.py` | O envelope do CR: `GROUP`/`VERSION`/`KIND`/`PLURAL`, `PlatformTask`, `task_body` (o que a API cria) e `task_from_body` (o que o controller lê) |
-| `labels.py` | As labels que purr põe no que cria (`purr.sh/task`, `purr.sh/component`, `managed-by`) |
-| `errors.py` | Os erros de domínio (`PurrError` e filhos); `purr_http.errors` é o único lugar que os mapeia para HTTP |
+| `labels.py` | As labels que meowly põe no que cria (`meowly.dev/task`, `meowly.dev/component`, `managed-by`) |
+| `errors.py` | Os erros de domínio (`MeowlyError` e filhos); `meowly_http.errors` é o único lugar que os mapeia para HTTP |
 | `version.py` | `SPEC_VERSION` |
 
 ## Regras
@@ -29,6 +29,6 @@ arrastar banco, HTTP nem cliente de Kubernetes.
    uma função daqui.
 4. **`decode_event` nunca levanta.** O stdout de um pod pode conter qualquer coisa que uma
    dependência decidiu imprimir; um leitor ignora o que não reconhece em vez de falhar a task.
-5. O CRD em `deploy/charts/purr/templates/crds/platformtask.yaml` descreve estes mesmos campos
+5. O CRD em `deploy/charts/meowly/templates/crds/platformtask.yaml` descreve estes mesmos campos
    em `snake_case`. **Mudou um campo aqui, mude lá no mesmo PR** — o schema do CRD é a validação
    que o API server aplica antes de qualquer código nosso rodar.

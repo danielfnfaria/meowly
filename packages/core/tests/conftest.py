@@ -6,7 +6,7 @@ from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.pool import StaticPool
 
-from purr_core import Base, Core, Database, InMemoryTaskStore, build_core
+from meowly_core import Base, Core, Database, InMemoryTaskStore, build_core
 
 
 def enable_sqlite_foreign_keys(engine: AsyncEngine) -> None:

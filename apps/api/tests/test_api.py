@@ -1,9 +1,9 @@
 import httpx
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from purr_api.api.deps import AppState
-from purr_contracts import SPEC_VERSION
-from purr_core import Database
+from meowly_api.api.deps import AppState
+from meowly_contracts import SPEC_VERSION
+from meowly_core import Database
 
 
 async def make_owner(client: httpx.AsyncClient, slug: str = "platform") -> str:
@@ -26,14 +26,14 @@ async def test_ready_runs_select_1(client: httpx.AsyncClient) -> None:
 async def test_ready_is_503_when_the_database_is_unreachable(
     client: httpx.AsyncClient, state: AppState
 ) -> None:
-    state.db = Database(create_async_engine("sqlite+aiosqlite:////nonexistent-dir/purr.db"))
+    state.db = Database(create_async_engine("sqlite+aiosqlite:////nonexistent-dir/meowly.db"))
     assert (await client.get("/healthz/ready")).status_code == 503
     assert (await client.get("/healthz/live")).status_code == 200
 
 
 async def test_info(client: httpx.AsyncClient) -> None:
     body = (await client.get("/v1/info")).json()
-    assert body["product"] == "purr"
+    assert body["product"] == "meowly"
     assert body["spec_version"] == SPEC_VERSION
     assert body["api_version"]
 

@@ -24,7 +24,7 @@ export function mockApi(routes: Record<string, Handler>) {
   return calls;
 }
 
-export const INFO = json({ product: "purr", api_version: "1.2.3", spec_version: 1 });
+export const INFO = json({ product: "meowly", api_version: "1.2.3", spec_version: 1 });
 export const info = () => INFO.clone();
 
 export function renderApp(path = "/") {

@@ -3,9 +3,9 @@ import uuid
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from purr_contracts import ConflictError, NotFoundError
-from purr_core import Core, Database, Owner
-from purr_core.repositories import OwnerRepository
+from meowly_contracts import ConflictError, NotFoundError
+from meowly_core import Core, Database, Owner
+from meowly_core.repositories import OwnerRepository
 
 
 async def test_repository_add_get_by_slug_delete(session: AsyncSession) -> None:

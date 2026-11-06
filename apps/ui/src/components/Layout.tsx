@@ -42,7 +42,7 @@ export function Layout() {
       <AppShell.Header>
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" aria-label="Menu" />
-          <Title order={3}>purr</Title>
+          <Title order={3}>meowly</Title>
           <Text c="dimmed" size="sm">
             Plataforma interna de desenvolvimento
           </Text>

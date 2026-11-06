@@ -15,7 +15,7 @@ dist/
 openapi.json
 
 # Subcharts fetched by `helm dependency build` (Chart.lock pins them).
-deploy/charts/purr/charts/*.tgz
+deploy/charts/meowly/charts/*.tgz
 
 # Claude Code: local worktrees of sub-agents and per-user settings.
 .claude/worktrees/

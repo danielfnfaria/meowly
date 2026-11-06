@@ -4,7 +4,7 @@ import logging
 import pytest
 import structlog
 
-from purr_runtime import configure_logging
+from meowly_runtime import configure_logging
 
 
 def test_logs_come_out_as_one_json_object_per_line(capsys: pytest.CaptureFixture[str]) -> None:

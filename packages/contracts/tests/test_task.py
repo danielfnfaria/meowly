@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError as PydanticValidationError
 
-from purr_contracts import SPEC_VERSION, TaskKind, TaskPhase, TaskSpec, TaskStatus
+from meowly_contracts import SPEC_VERSION, TaskKind, TaskPhase, TaskSpec, TaskStatus
 
 
 def test_spec_carries_the_current_wire_version() -> None:

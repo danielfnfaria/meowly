@@ -2,7 +2,7 @@ import io
 
 import pytest
 
-from purr_contracts import (
+from meowly_contracts import (
     TaskEvent,
     TaskEventType,
     TaskKind,
@@ -12,7 +12,7 @@ from purr_contracts import (
     decode_event,
     status_from_event,
 )
-from purr_engine import STEPS, Emit, EventWriter, execute
+from meowly_engine import STEPS, Emit, EventWriter, execute
 
 
 def _spec(kind: TaskKind) -> TaskSpec:

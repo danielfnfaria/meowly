@@ -1,6 +1,6 @@
 """The CRD and these models must describe the same thing.
 
-The API server validates a PlatformTask against the chart's schema before any purr code sees
+The API server validates a PlatformTask against the chart's schema before any meowly code sees
 it, so a field added here and forgotten in the CRD is rejected at creation time — and one
 removed here but left there is accepted and then ignored. Neither is visible in review unless
 something checks, so this does (the rule is written down in `packages/contracts/CLAUDE.md`).
@@ -13,9 +13,9 @@ from typing import Any
 import pytest
 import yaml
 
-from purr_contracts import TaskKind, TaskPhase, TaskSpec, TaskStatus
+from meowly_contracts import TaskKind, TaskPhase, TaskSpec, TaskStatus
 
-CRD = Path(__file__).resolve().parents[1] / "deploy/charts/purr/templates/crds/platformtask.yaml"
+CRD = Path(__file__).resolve().parents[1] / "deploy/charts/meowly/templates/crds/platformtask.yaml"
 
 
 def _properties() -> dict[str, Any]:

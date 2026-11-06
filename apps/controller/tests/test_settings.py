@@ -2,14 +2,14 @@ import json
 
 import pytest
 
-from purr_controller.settings import Settings
+from meowly_controller.settings import Settings
 
 
 def _settings(monkeypatch: pytest.MonkeyPatch, resources: object) -> Settings:
     # Through the environment, as the chart sets it: the JSON parse happens before the
     # validator under test. `worker_image` is passed because it has no default.
-    monkeypatch.setenv("PURR_WORKER_RESOURCES", json.dumps(resources))
-    return Settings(worker_image="purr-worker:dev")
+    monkeypatch.setenv("MEOWLY_WORKER_RESOURCES", json.dumps(resources))
+    return Settings(worker_image="meowly-worker:dev")
 
 
 def test_a_numeric_quantity_is_accepted(monkeypatch: pytest.MonkeyPatch) -> None:

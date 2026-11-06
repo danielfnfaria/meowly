@@ -1,0 +1,58 @@
+{{- $ctx := dict "root" $ "component" "controller" }}
+{{- $b := .Values.controller }}
+# One replica and no Service: the controller does not serve HTTP (kopf watches the API server).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "meowly.componentName" $ctx }}
+  labels:
+    {{- include "meowly.componentLabels" $ctx | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "meowly.selectorLabels" $ctx | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "meowly.componentLabels" $ctx | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "meowly.componentName" $ctx }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: controller
+          image: {{ include "meowly.image" (dict "root" $ "image" $b.image) | quote }}
+          imagePullPolicy: {{ $b.image.pullPolicy }}
+          env:
+            - name: MEOWLY_LOG_LEVEL
+              value: {{ $b.logLevel | quote }}
+            - name: MEOWLY_EXECUTION_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: MEOWLY_WORKER_IMAGE
+              value: {{ include "meowly.image" (dict "root" $ "image" .Values.worker.image) | quote }}
+            - name: MEOWLY_WORKER_IMAGE_PULL_POLICY
+              value: {{ .Values.worker.image.pullPolicy | quote }}
+            - name: MEOWLY_WORKER_RESOURCES
+              value: {{ .Values.worker.resources | toJson | quote }}
+            - name: MEOWLY_WORKER_SERVICE_ACCOUNT
+              value: {{ include "meowly.workerServiceAccountName" . | quote }}
+            - name: MEOWLY_TASK_TTL_SECONDS
+              value: {{ $b.taskTtlSeconds | quote }}
+            - name: MEOWLY_JOB_ACTIVE_DEADLINE_SECONDS
+              value: {{ $b.job.activeDeadlineSeconds | quote }}
+            - name: MEOWLY_JOB_BACKOFF_LIMIT
+              value: {{ $b.job.backoffLimit | quote }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            {{- toYaml $b.resources | nindent 12 }}

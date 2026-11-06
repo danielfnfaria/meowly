@@ -59,7 +59,7 @@ export function Tasks() {
     <Stack>
       <Title order={2}>Tasks</Title>
       <Alert color="blue">
-        Sem cluster (<code>PURR_LAUNCHER=memory</code>, como no <code>make up</code>), a task fica{" "}
+        Sem cluster (<code>MEOWLY_LAUNCHER=memory</code>, como no <code>make up</code>), a task fica{" "}
         <code>pending</code> e nada a executa.
       </Alert>
       <QueryState query={tasks} empty="Nenhuma task ainda.">

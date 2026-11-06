@@ -1,0 +1,23 @@
+{{- /* Never for the controller (single replica by design) nor for the dev Postgres. */}}
+{{- range $component := list "api" }}
+{{- $b := index $.Values $component }}
+{{- if $b.podDisruptionBudget.enabled }}
+{{- $ctx := dict "root" $ "component" $component }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "meowly.componentName" $ctx }}
+  labels:
+    {{- include "meowly.componentLabels" $ctx | nindent 4 }}
+spec:
+  {{- if hasKey $b.podDisruptionBudget "minAvailable" }}
+  minAvailable: {{ $b.podDisruptionBudget.minAvailable }}
+  {{- else }}
+  maxUnavailable: {{ $b.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "meowly.selectorLabels" $ctx | nindent 6 }}
+{{- end }}
+{{- end }}

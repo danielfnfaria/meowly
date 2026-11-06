@@ -1,11 +1,11 @@
 [project]
-name = "purr-controller"
+name = "meowly-controller"
 version = "0.1.0"
-description = "purr controller: Kubernetes operator reconciling PlatformTask -> Job"
+description = "meowly controller: Kubernetes operator reconciling PlatformTask -> Job"
 requires-python = ">=3.13"
 dependencies = [
-    "purr-contracts",
-    "purr-runtime",
+    "meowly-contracts",
+    "meowly-runtime",
     "kopf>=1.37",
     "lightkube>=0.17",
     "pydantic>=2.11",
@@ -14,11 +14,11 @@ dependencies = [
 ]
 
 [project.scripts]
-purr-controller = "purr_controller.main:run"
+meowly-controller = "meowly_controller.main:run"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/purr_controller"]
+packages = ["src/meowly_controller"]

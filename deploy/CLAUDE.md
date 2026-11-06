@@ -1,6 +1,6 @@
 # deploy/ — o chart e os ambientes
 
-Um chart único, `deploy/charts/purr`, com todo o produto (ADR 0001). Nada de `kubectl apply`,
+Um chart único, `deploy/charts/meowly`, com todo o produto (ADR 0001). Nada de `kubectl apply`,
 `kubectl edit` ou `helm --set` em ambiente compartilhado: a mudança passa pelo chart (com bump
 de `version` no `Chart.yaml`) ou pelo overlay em `deploy/values/`.
 
@@ -8,7 +8,7 @@ de `version` no `Chart.yaml`) ou pelo overlay em `deploy/values/`.
 
 | Caminho | O que instala |
 |---|---|
-| `templates/crds/platformtask.yaml` | O CRD `platformtasks.purr.sh` (`v1alpha1`), com `status` como subrecurso e colunas PHASE/KIND/AGE. Guardado por `crds.install` |
+| `templates/crds/platformtask.yaml` | O CRD `platformtasks.meowly.dev` (`v1alpha1`), com `status` como subrecurso e colunas PHASE/KIND/AGE. Guardado por `crds.install` |
 | `templates/api/` | Deployment (com o init container `migrate` rodando `alembic upgrade head`), Service, ServiceAccount, Role/RoleBinding e o Secret da URL do banco |
 | `templates/controller/` | Deployment de uma réplica (não serve HTTP, não tem Service), ServiceAccount e Role/RoleBinding |
 | `templates/worker/serviceaccount.yaml` | A identidade dos Jobs, **sem nenhuma permissão** (ADR 0002) |
@@ -58,6 +58,6 @@ make check-helm     # lint + template dos defaults, do overlay, do caso com Secr
 
 `skaffold dev` (via `make minikube-dev`) builda as três imagens direto no Docker do minikube
 (sem registry, tag por conteúdo, então o `IfNotPresent` do chart usa o que acabou de sair),
-instala o chart com `deploy/values/minikube.yaml` no namespace `purr` e faz port-forward da API
+instala o chart com `deploy/values/minikube.yaml` no namespace `meowly` e faz port-forward da API
 (:8000) e do Postgres (:5432). O `skaffold.yaml` **fixa `kubeContext: minikube`** de propósito:
 o contexto atual pode ser um cluster de verdade. Sem ingress e sem cert-manager.

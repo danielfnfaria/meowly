@@ -1,11 +1,11 @@
-# Local development of purr (see compose.yaml for what `make up` runs and its limits).
+# Local development of meowly (see compose.yaml for what `make up` runs and its limits).
 #
 #   make up        the catalog in Docker: UI and API on http://localhost:8000 (API under /v1)
 #   make ui        the UI from this checkout with hot reload (Vite on :5173) against that API
 #   make check     every quality check; run it before opening a PR
 #
 #   make minikube-start   start the local cluster (minikube, Docker driver)
-#   make minikube-dev     skaffold dev: the whole platform in the `purr` namespace, with the
+#   make minikube-dev     skaffold dev: the whole platform in the `meowly` namespace, with the
 #                         PlatformTask CRD and the controller, port-forwarded to :8000
 #   make minikube-delete  skaffold delete + the PVC it leaves behind (Postgres)
 
@@ -49,8 +49,8 @@ ui: ## UI with hot reload on http://localhost:5173 (UI_PORT=...); Vite proxies /
 
 MINIKUBE_CPUS ?= 4
 MINIKUBE_MEMORY ?= 4g
-KUBE_LOCAL = kubectl --context minikube -n purr
-LOCAL_PVCS = data-purr-postgresql-0
+KUBE_LOCAL = kubectl --context minikube -n meowly
+LOCAL_PVCS = data-meowly-postgresql-0
 
 minikube-start: ## Start minikube (Docker driver; MINIKUBE_CPUS=4, MINIKUBE_MEMORY=4g)
 	minikube start --driver=docker --cpus=$(MINIKUBE_CPUS) --memory=$(MINIKUBE_MEMORY)
@@ -65,8 +65,8 @@ minikube-delete: ## skaffold delete + the PVC it leaves behind (the Postgres dat
 	skaffold delete
 	$(KUBE_LOCAL) delete pvc $(LOCAL_PVCS) --ignore-not-found
 
-minikube-pg-password: ## Password of the local Postgres (user purr, localhost:5432)
-	@$(KUBE_LOCAL) get secret purr-postgresql -o jsonpath='{.data.password}' | base64 -d; echo
+minikube-pg-password: ## Password of the local Postgres (user meowly, localhost:5432)
+	@$(KUBE_LOCAL) get secret meowly-postgresql -o jsonpath='{.data.password}' | base64 -d; echo
 
 # ---- Quality checks ----
 
@@ -86,30 +86,30 @@ check-ui: ## UI eslint, tsc, vitest and prettier
 
 check-openapi: ## apps/ui/src/api/schema.d.ts matches this checkout's API (fix: cd apps/ui && npm run generate-api:local)
 	@test -d apps/ui/node_modules || $(MAKE) ui-install
-	uv run --package purr-api python -m purr_api.openapi > apps/ui/openapi.json
+	uv run --package meowly-api python -m meowly_api.openapi > apps/ui/openapi.json
 	cd apps/ui && npm run -s check-api; status=$$?; rm -f openapi.json; exit $$status
 
-CHART = deploy/charts/purr
+CHART = deploy/charts/meowly
 
 check-helm: ## helm lint + template of the chart: defaults and the minikube overlay
 	helm lint $(CHART)
 	helm lint $(CHART) -f deploy/values/minikube.yaml
-	helm template --kube-version 1.30.0 purr $(CHART) -n purr > /dev/null
-	helm template --kube-version 1.30.0 purr $(CHART) -n purr -f deploy/values/minikube.yaml > /dev/null
-	helm template --kube-version 1.30.0 purr $(CHART) -n purr \
-		--set postgresql.enabled=false --set api.database.existingSecret=purr-database > /dev/null
+	helm template --kube-version 1.30.0 meowly $(CHART) -n meowly > /dev/null
+	helm template --kube-version 1.30.0 meowly $(CHART) -n meowly -f deploy/values/minikube.yaml > /dev/null
+	helm template --kube-version 1.30.0 meowly $(CHART) -n meowly \
+		--set postgresql.enabled=false --set api.database.existingSecret=meowly-database > /dev/null
 	@# No bundled Postgres and no database configured: the chart must refuse to render.
-	@if helm template --kube-version 1.30.0 purr $(CHART) -n purr \
+	@if helm template --kube-version 1.30.0 meowly $(CHART) -n meowly \
 		--set postgresql.enabled=false > /dev/null 2>&1; then \
 		echo "check-helm: the chart rendered without any database configured"; exit 1; fi
 
 PG_CHECK_PORT ?= 55432
 
 check-migrations: ## alembic upgrade head + alembic check (packages/core) against a throwaway Postgres (Docker, port PG_CHECK_PORT)
-	@docker rm -f purr-check-postgres >/dev/null 2>&1 || true
-	docker run -d --rm --name purr-check-postgres -p $(PG_CHECK_PORT):5432 \
-		-e POSTGRES_USER=purr -e POSTGRES_PASSWORD=purr -e POSTGRES_DB=purr postgres:16-alpine >/dev/null
-	@until docker exec purr-check-postgres pg_isready -h 127.0.0.1 -U purr -d purr -q; do sleep 1; done
-	cd packages/core && export PURR_DATABASE_URL=postgresql+asyncpg://purr:purr@localhost:$(PG_CHECK_PORT)/purr \
+	@docker rm -f meowly-check-postgres >/dev/null 2>&1 || true
+	docker run -d --rm --name meowly-check-postgres -p $(PG_CHECK_PORT):5432 \
+		-e POSTGRES_USER=meowly -e POSTGRES_PASSWORD=meowly -e POSTGRES_DB=meowly postgres:16-alpine >/dev/null
+	@until docker exec meowly-check-postgres pg_isready -h 127.0.0.1 -U meowly -d meowly -q; do sleep 1; done
+	cd packages/core && export MEOWLY_DATABASE_URL=postgresql+asyncpg://meowly:meowly@localhost:$(PG_CHECK_PORT)/meowly \
 		&& uv run --extra migrations alembic upgrade head && uv run --extra migrations alembic check; \
-		status=$$?; docker rm -f purr-check-postgres >/dev/null; exit $$status
+		status=$$?; docker rm -f meowly-check-postgres >/dev/null; exit $$status

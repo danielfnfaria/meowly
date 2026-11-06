@@ -23,7 +23,7 @@ COPY apps/api/pyproject.toml apps/api/
 COPY apps/controller/pyproject.toml apps/controller/
 COPY apps/worker/pyproject.toml apps/worker/
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --no-build --no-install-workspace --package purr-api
+    uv sync --frozen --no-dev --no-build --no-install-workspace --package meowly-api
 COPY packages/contracts packages/contracts
 COPY packages/runtime packages/runtime
 # packages/core also ships the Alembic migrations (alembic.ini + alembic/), run from this image.
@@ -31,7 +31,7 @@ COPY packages/core packages/core
 COPY packages/http packages/http
 COPY apps/api apps/api
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --package purr-api
+    uv sync --frozen --no-dev --package meowly-api
 
 FROM python:3.13-slim-bookworm
 RUN useradd --no-create-home --uid 10001 app
@@ -40,10 +40,10 @@ COPY --from=builder --chown=app:app /app /app
 COPY --from=ui /ui/dist /app/ui
 # ALEMBIC_CONFIG: a plain `alembic upgrade head` (the chart's `migrate` init container, compose)
 # finds the migrations, which live with the models in packages/core (next to the package, in
-# src/purr_core, so they are importable and shipped together).
-ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 PURR_UI_DIR=/app/ui \
+# src/meowly_core, so they are importable and shipped together).
+ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 MEOWLY_UI_DIR=/app/ui \
     ALEMBIC_CONFIG=/app/packages/core/alembic.ini
 # Numeric UID so Kubernetes' runAsNonRoot can verify it (matches useradd above).
 USER 10001:10001
 EXPOSE 8000
-CMD ["purr-api"]
+CMD ["meowly-api"]

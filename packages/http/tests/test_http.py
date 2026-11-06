@@ -6,18 +6,18 @@ import pytest
 from fastapi import FastAPI
 from starlette.requests import Request
 
-from purr_contracts import (
+from meowly_contracts import (
     AuthenticationError,
     ConflictError,
+    MeowlyError,
     NotFoundError,
     PayloadTooLargeError,
     PermissionDeniedError,
-    PurrError,
     UnavailableError,
     UpstreamError,
     ValidationError,
 )
-from purr_http import app_lifespan, bearer_token, build_app, health_routes, status_for
+from meowly_http import app_lifespan, bearer_token, build_app, health_routes, status_for
 
 
 @asynccontextmanager
@@ -29,7 +29,7 @@ class SubNotFound(NotFoundError):  # noqa: N818
     pass
 
 
-class Unmapped(PurrError):  # noqa: N818
+class Unmapped(MeowlyError):  # noqa: N818
     pass
 
 

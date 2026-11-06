@@ -8,10 +8,10 @@ from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.pool import StaticPool
 
-from purr_api.api.deps import AppState
-from purr_api.main import create_app
-from purr_api.settings import Settings
-from purr_core import Base, Database, InMemoryTaskStore
+from meowly_api.api.deps import AppState
+from meowly_api.main import create_app
+from meowly_api.settings import Settings
+from meowly_core import Base, Database, InMemoryTaskStore
 
 
 def make_settings(ui_dir: Path | None = None) -> Settings:
@@ -42,7 +42,7 @@ async def state() -> AsyncGenerator[AppState]:
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all)
     db = Database(engine)
-    yield AppState(settings=make_settings(), db=db, tasks=InMemoryTaskStore("purr"))
+    yield AppState(settings=make_settings(), db=db, tasks=InMemoryTaskStore("meowly"))
     await db.dispose()
 
 

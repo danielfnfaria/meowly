@@ -1,4 +1,4 @@
-# purr on a laptop, no Kubernetes: the UI and the API against a real Postgres.
+# meowly on a laptop, no Kubernetes: the UI and the API against a real Postgres.
 #
 #   make up     UI http://localhost:8000   API http://localhost:8000/v1/docs
 #   make ui     + the UI of this checkout with hot reload on :5173
@@ -8,23 +8,23 @@
 #
 # Only for working on the catalog and the interface. Running a task needs the cluster (the
 # PlatformTask CRD, the controller and the worker pods), so the API starts with
-# PURR_LAUNCHER=memory: a task is recorded as pending in the API process and nothing executes
+# MEOWLY_LAUNCHER=memory: a task is recorded as pending in the API process and nothing executes
 # it. `make minikube-dev` is where the whole loop runs.
 
-name: purr
+name: meowly
 
 services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: purr
-      POSTGRES_DB: purr
+      POSTGRES_USER: meowly
+      POSTGRES_DB: meowly
       # Reachable only inside this compose network (no host port): no password to commit.
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - pg-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U purr"]
+      test: ["CMD-SHELL", "pg_isready -U meowly"]
       interval: 2s
       retries: 30
 
@@ -33,11 +33,11 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     environment:
-      PURR_DATABASE_URL: postgresql+asyncpg://purr@postgres:5432/purr
-      PURR_LAUNCHER: memory
-      PURR_EXECUTION_NAMESPACE: purr
+      MEOWLY_DATABASE_URL: postgresql+asyncpg://meowly@postgres:5432/meowly
+      MEOWLY_LAUNCHER: memory
+      MEOWLY_EXECUTION_NAMESPACE: meowly
     # Migrations first, as the chart's init container does in the cluster.
-    command: ["sh", "-c", "alembic upgrade head && exec purr-api"]
+    command: ["sh", "-c", "alembic upgrade head && exec meowly-api"]
     ports:
       - "127.0.0.1:8000:8000"
     healthcheck:

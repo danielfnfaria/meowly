@@ -9,7 +9,7 @@ templates, environments) live, and how does the admin interface reach it?
 
 Backstage-style IDPs often keep the catalog in YAML inside each repository and reconcile it
 into memory. That is attractive — the catalog follows the code — but it makes every read
-depend on a sync loop, and purr's first need is plain CRUD over a handful of entities that a
+depend on a sync loop, and meowly's first need is plain CRUD over a handful of entities that a
 human edits in a form.
 
 For the UI, the alternatives were a separately deployed frontend (its own image, its own

@@ -1,4 +1,4 @@
-# Local cluster: the whole platform in the `purr` namespace of minikube.
+# Local cluster: the whole platform in the `meowly` namespace of minikube.
 #
 #   make minikube-start && make minikube-dev
 #
@@ -10,7 +10,7 @@
 apiVersion: skaffold/v4beta11
 kind: Config
 metadata:
-  name: purr
+  name: meowly
 
 build:
   tagPolicy:
@@ -19,15 +19,15 @@ build:
     push: false
     useBuildkit: true
   artifacts:
-    - image: purr-api
+    - image: meowly-api
       context: .
       docker:
         dockerfile: apps/api/Dockerfile
-    - image: purr-controller
+    - image: meowly-controller
       context: .
       docker:
         dockerfile: apps/controller/Dockerfile
-    - image: purr-worker
+    - image: meowly-worker
       context: .
       docker:
         dockerfile: apps/worker/Dockerfile
@@ -35,19 +35,19 @@ build:
 manifests:
   helm:
     releases:
-      - name: purr
-        chartPath: deploy/charts/purr
+      - name: meowly
+        chartPath: deploy/charts/meowly
         valuesFiles:
           - deploy/values/minikube.yaml
-        namespace: purr
+        namespace: meowly
         createNamespace: true
         setValueTemplates:
-          api.image.repository: "{{.IMAGE_REPO_purr_api}}"
-          api.image.tag: "{{.IMAGE_TAG_purr_api}}"
-          controller.image.repository: "{{.IMAGE_REPO_purr_controller}}"
-          controller.image.tag: "{{.IMAGE_TAG_purr_controller}}"
-          worker.image.repository: "{{.IMAGE_REPO_purr_worker}}"
-          worker.image.tag: "{{.IMAGE_TAG_purr_worker}}"
+          api.image.repository: "{{.IMAGE_REPO_meowly_api}}"
+          api.image.tag: "{{.IMAGE_TAG_meowly_api}}"
+          controller.image.repository: "{{.IMAGE_REPO_meowly_controller}}"
+          controller.image.tag: "{{.IMAGE_TAG_meowly_controller}}"
+          worker.image.repository: "{{.IMAGE_REPO_meowly_worker}}"
+          worker.image.tag: "{{.IMAGE_TAG_meowly_worker}}"
         version: 0.1.1
 
 deploy:
@@ -57,12 +57,12 @@ deploy:
 
 portForward:
   - resourceType: service
-    resourceName: purr-api
-    namespace: purr
+    resourceName: meowly-api
+    namespace: meowly
     port: 8000
     localPort: 8000
   - resourceType: service
-    resourceName: purr-postgresql
-    namespace: purr
+    resourceName: meowly-postgresql
+    namespace: meowly
     port: 5432
     localPort: 5432

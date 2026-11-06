@@ -4,7 +4,7 @@ from typing import Any
 
 import kopf
 
-from purr_contracts import (
+from meowly_contracts import (
     COMPONENT_LABEL,
     MANAGED_BY,
     MANAGED_BY_LABEL,
@@ -17,9 +17,9 @@ from purr_contracts import (
     TaskStatus,
     encode_event,
 )
-from purr_controller.adapters.memory import MemoryKube
-from purr_controller.handlers import job_event, runtime_of, task_created, task_timer
-from purr_controller.settings import Settings
+from meowly_controller.adapters.memory import MemoryKube
+from meowly_controller.handlers import job_event, runtime_of, task_created, task_timer
+from meowly_controller.settings import Settings
 
 from .conftest import UID, WORKER_IMAGE, finished_status, make_body, old, stored
 
@@ -56,12 +56,12 @@ async def test_create_makes_the_job_and_marks_the_task_running(
     container = pod["containers"][0]
     env = {e["name"]: e["value"] for e in container["env"]}
     assert container["image"] == WORKER_IMAGE
-    assert env["PURR_TASK_NAME"] == "task-1"
-    spec = TaskSpec.model_validate_json(env["PURR_TASK_SPEC"])
+    assert env["MEOWLY_TASK_NAME"] == "task-1"
+    spec = TaskSpec.model_validate_json(env["MEOWLY_TASK_SPEC"])
     assert spec.kind is TaskKind.NOOP
     assert spec.component == "checkout"
-    assert json.loads(env["PURR_TASK_SPEC"])["requested_by"] == "daniel"
-    assert pod["serviceAccountName"] == "purr-worker-sa"
+    assert json.loads(env["MEOWLY_TASK_SPEC"])["requested_by"] == "daniel"
+    assert pod["serviceAccountName"] == "meowly-worker-sa"
     assert pod["restartPolicy"] == "Never"
     assert pod["securityContext"]["runAsNonRoot"] is True
     assert job["spec"]["backoffLimit"] == 2

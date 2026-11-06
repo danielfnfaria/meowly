@@ -1,7 +1,7 @@
 [project]
-name = "purr-workspace"
+name = "meowly-workspace"
 version = "0.0.0"
-description = "purr - internal developer platform, Python monorepo (api, controller, worker; contracts, core, http, engine, runtime)"
+description = "meowly - internal developer platform, Python monorepo (api, controller, worker; contracts, core, http, engine, runtime)"
 requires-python = ">=3.13"
 
 [tool.uv.workspace]
@@ -9,14 +9,14 @@ members = ["apps/*", "packages/*"]
 exclude = ["apps/ui"]
 
 [tool.uv.sources]
-purr-contracts = { workspace = true }
-purr-core = { workspace = true }
-purr-engine = { workspace = true }
-purr-http = { workspace = true }
-purr-runtime = { workspace = true }
-purr-api = { workspace = true }
-purr-controller = { workspace = true }
-purr-worker = { workspace = true }
+meowly-contracts = { workspace = true }
+meowly-core = { workspace = true }
+meowly-engine = { workspace = true }
+meowly-http = { workspace = true }
+meowly-runtime = { workspace = true }
+meowly-api = { workspace = true }
+meowly-controller = { workspace = true }
+meowly-worker = { workspace = true }
 
 [dependency-groups]
 dev = [
@@ -47,14 +47,14 @@ ignore = ["S101"]  # assert is fine in tests
 
 [tool.ruff.lint.isort]
 known-first-party = [
-    "purr_contracts",
-    "purr_core",
-    "purr_engine",
-    "purr_http",
-    "purr_runtime",
-    "purr_api",
-    "purr_controller",
-    "purr_worker",
+    "meowly_contracts",
+    "meowly_core",
+    "meowly_engine",
+    "meowly_http",
+    "meowly_runtime",
+    "meowly_api",
+    "meowly_controller",
+    "meowly_worker",
 ]
 
 [tool.pyright]
@@ -100,58 +100,58 @@ relative_files = true
 
 [tool.importlinter]
 root_packages = [
-    "purr_api",
-    "purr_controller",
-    "purr_worker",
-    "purr_contracts",
-    "purr_core",
-    "purr_engine",
-    "purr_http",
-    "purr_runtime",
+    "meowly_api",
+    "meowly_controller",
+    "meowly_worker",
+    "meowly_contracts",
+    "meowly_core",
+    "meowly_engine",
+    "meowly_http",
+    "meowly_runtime",
 ]
 include_external_packages = false
 
 [[tool.importlinter.contracts]]
 name = "Apps never import other apps"
 type = "independence"
-modules = ["purr_api", "purr_controller", "purr_worker"]
+modules = ["meowly_api", "meowly_controller", "meowly_worker"]
 
 [[tool.importlinter.contracts]]
 name = "Packages never import apps"
 type = "forbidden"
-source_modules = ["purr_contracts", "purr_core", "purr_engine", "purr_http", "purr_runtime"]
-forbidden_modules = ["purr_api", "purr_controller", "purr_worker"]
+source_modules = ["meowly_contracts", "meowly_core", "meowly_engine", "meowly_http", "meowly_runtime"]
+forbidden_modules = ["meowly_api", "meowly_controller", "meowly_worker"]
 
 [[tool.importlinter.contracts]]
 name = "Contracts import no other workspace package"
 type = "forbidden"
-source_modules = ["purr_contracts"]
-forbidden_modules = ["purr_core", "purr_engine", "purr_http", "purr_runtime"]
+source_modules = ["meowly_contracts"]
+forbidden_modules = ["meowly_core", "meowly_engine", "meowly_http", "meowly_runtime"]
 
 # Process plumbing (JSON logging, server bind settings): structlog + pydantic-settings only.
 [[tool.importlinter.contracts]]
 name = "The runtime imports no workspace package"
 type = "forbidden"
-source_modules = ["purr_runtime"]
-forbidden_modules = ["purr_contracts", "purr_core", "purr_engine", "purr_http"]
+source_modules = ["meowly_runtime"]
+forbidden_modules = ["meowly_contracts", "meowly_core", "meowly_engine", "meowly_http"]
 
 # The engine runs inside a worker pod: no database, no HTTP server.
 [[tool.importlinter.contracts]]
 name = "The engine imports neither the core nor the HTTP package"
 type = "forbidden"
-source_modules = ["purr_engine"]
-forbidden_modules = ["purr_core", "purr_http"]
+source_modules = ["meowly_engine"]
+forbidden_modules = ["meowly_core", "meowly_http"]
 
 [[tool.importlinter.contracts]]
 name = "The core imports neither the engine nor the HTTP package"
 type = "forbidden"
-source_modules = ["purr_core"]
-forbidden_modules = ["purr_engine", "purr_http"]
+source_modules = ["meowly_core"]
+forbidden_modules = ["meowly_engine", "meowly_http"]
 
 # The controller only reconciles PlatformTask -> Job: it reads no catalog and serves no HTTP.
 # The worker pod has no database credentials either (ADR 0002).
 [[tool.importlinter.contracts]]
 name = "The controller and the worker touch neither the catalog nor the HTTP package"
 type = "forbidden"
-source_modules = ["purr_controller", "purr_worker"]
-forbidden_modules = ["purr_core", "purr_http"]
+source_modules = ["meowly_controller", "meowly_worker"]
+forbidden_modules = ["meowly_core", "meowly_http"]

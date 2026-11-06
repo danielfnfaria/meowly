@@ -32,10 +32,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: azure/setup-helm@v4
-      - run: helm lint deploy/charts/purr
-      - run: helm lint deploy/charts/purr -f deploy/values/minikube.yaml
-      - run: helm template --kube-version 1.30.0 purr deploy/charts/purr -n purr > /dev/null
-      - run: helm template --kube-version 1.30.0 purr deploy/charts/purr -n purr -f deploy/values/minikube.yaml > /dev/null
+      - run: helm lint deploy/charts/meowly
+      - run: helm lint deploy/charts/meowly -f deploy/values/minikube.yaml
+      - run: helm template --kube-version 1.30.0 meowly deploy/charts/meowly -n meowly > /dev/null
+      - run: helm template --kube-version 1.30.0 meowly deploy/charts/meowly -n meowly -f deploy/values/minikube.yaml > /dev/null
 
   ui:
     # apps/ui is created in a later change: skip the job until it has a package.json,

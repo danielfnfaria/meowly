@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 import kopf
 import pytest
 
-from purr_contracts import (
+from meowly_contracts import (
     JsonDict,
     PlatformTask,
     TaskKind,
@@ -12,11 +12,11 @@ from purr_contracts import (
     TaskStatus,
     task_body,
 )
-from purr_controller.adapters.memory import MemoryKube
-from purr_controller.handlers import Runtime
-from purr_controller.settings import Settings
+from meowly_controller.adapters.memory import MemoryKube
+from meowly_controller.handlers import Runtime
+from meowly_controller.settings import Settings
 
-WORKER_IMAGE = "registry.example/purr-worker:abc"
+WORKER_IMAGE = "registry.example/meowly-worker:abc"
 UID = "7b6c1d2e-0000-0000-0000-000000000001"
 
 
@@ -24,8 +24,8 @@ UID = "7b6c1d2e-0000-0000-0000-000000000001"
 def settings() -> Settings:
     return Settings(
         worker_image=WORKER_IMAGE,
-        execution_namespace="purr-test",
-        worker_service_account="purr-worker-sa",
+        execution_namespace="meowly-test",
+        worker_service_account="meowly-worker-sa",
         task_ttl_seconds=600,
         job_active_deadline_seconds=300,
         job_backoff_limit=2,
@@ -48,7 +48,7 @@ def make_body(
     name: str = "task-1", *, status: TaskStatus | None = None, component: str | None = "checkout"
 ) -> JsonDict:
     spec = TaskSpec(kind=TaskKind.NOOP, component=component, requested_by="daniel")
-    body = task_body(name, namespace="purr-test", spec=spec)
+    body = task_body(name, namespace="meowly-test", spec=spec)
     body["metadata"]["uid"] = UID
     if status is not None:
         body["status"] = status.model_dump(mode="json")
@@ -57,7 +57,7 @@ def make_body(
 
 def stored(kube: MemoryKube, body: JsonDict) -> PlatformTask:
     """Put the CR in the fake cluster, as the API server would hold it."""
-    from purr_contracts import task_from_body
+    from meowly_contracts import task_from_body
 
     task = task_from_body(body)
     kube.tasks[task.name] = task

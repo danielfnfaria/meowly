@@ -1,10 +1,10 @@
 [project]
-name = "purr-engine"
+name = "meowly-engine"
 version = "0.1.0"
-description = "purr engine: runs one task and reports it as a JSONL event stream (used by the worker pod)"
+description = "meowly engine: runs one task and reports it as a JSONL event stream (used by the worker pod)"
 requires-python = ">=3.13"
 dependencies = [
-    "purr-contracts",
+    "meowly-contracts",
     "structlog>=25",
 ]
 
@@ -13,4 +13,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/purr_engine"]
+packages = ["src/meowly_engine"]

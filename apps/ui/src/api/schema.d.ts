@@ -314,7 +314,7 @@ export interface components {
     };
     /**
      * ErrorOut
-     * @description Every error this API returns: `purr_http.errors` maps a domain error to a status and
+     * @description Every error this API returns: `meowly_http.errors` maps a domain error to a status and
      *     this body. It is declared on the routes (not only implemented) because the UI client is
      *     generated from the OpenAPI (ADR 0004): an error shape the schema does not mention is an
      *     error the UI has to guess.
@@ -550,7 +550,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -606,7 +606,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -666,7 +666,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -725,7 +725,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -782,7 +782,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -845,7 +845,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -901,7 +901,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -961,7 +961,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1020,7 +1020,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1077,7 +1077,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1140,7 +1140,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1196,7 +1196,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1256,7 +1256,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1315,7 +1315,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1372,7 +1372,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1435,7 +1435,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1491,7 +1491,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1551,7 +1551,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1610,7 +1610,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1667,7 +1667,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1730,7 +1730,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1786,7 +1786,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1846,7 +1846,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
@@ -1905,7 +1905,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorOut"];
         };
       };
-      /** @description Kubernetes or another system purr depends on failed */
+      /** @description Kubernetes or another system meowly depends on failed */
       502: {
         headers: {
           [name: string]: unknown;
